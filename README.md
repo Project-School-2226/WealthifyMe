@@ -1,4 +1,4 @@
-<h1 align="center" id="title">WealthifyMe</h1>
+<h1 id="title">WealthifyMe</h1>
 
 <p id="description">WealthWise is an intelligent financial advisory and planning assistant designed to enhance personal finance management. It addresses common challenges in financial planning by offering personalized financial advice investment recommendations and real-time insights. Utilizing a Retrieval-Augmented Generation (RAG) framework an Agent framework and a pre-trained Large Language Model (LLM) WealthWise aims to provide users with accurate timely and actionable financial guidance.</p>
 
