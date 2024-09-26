@@ -23,20 +23,11 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -50,20 +41,48 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBf8SxwSdM6oPCk5uqZbF_5mjJ7xfutiXE',
-    appId: '1:790551533803:web:6ceda09938c5a2d28446ae',
-    messagingSenderId: '790551533803',
-    projectId: 'wealthify-me',
-    authDomain: 'wealthify-me.firebaseapp.com',
-    storageBucket: 'wealthify-me.appspot.com',
-    measurementId: 'G-ME53DBT55W',
+    apiKey: 'AIzaSyD9-lzhSzKgDlE77_Rni1nu-scpmINZA0U',
+    appId: '1:982938198507:web:4ae199b0b7dfc6cca2b9ae',
+    messagingSenderId: '982938198507',
+    projectId: 'wealthifyme-b2b92',
+    authDomain: 'wealthifyme-b2b92.firebaseapp.com',
+    storageBucket: 'wealthifyme-b2b92.appspot.com',
+    measurementId: 'G-5VESRG064S',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyC3mmA1lGFnYCsR5jCloPs6_8Q-xzi8Vh4',
-    appId: '1:790551533803:android:c4ac05efdabe127a8446ae',
-    messagingSenderId: '790551533803',
-    projectId: 'wealthify-me',
-    storageBucket: 'wealthify-me.appspot.com',
+    apiKey: 'AIzaSyABY8quqrbOdDFxJ63EpoeB6kO1miOzlCY',
+    appId: '1:982938198507:android:cb18e04d45a40bb6a2b9ae',
+    messagingSenderId: '982938198507',
+    projectId: 'wealthifyme-b2b92',
+    storageBucket: 'wealthifyme-b2b92.appspot.com',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyAzgNg1YU22r1nVFFscjdKeRqC7WmC9umk',
+    appId: '1:982938198507:ios:e16c30e6aa275e19a2b9ae',
+    messagingSenderId: '982938198507',
+    projectId: 'wealthifyme-b2b92',
+    storageBucket: 'wealthifyme-b2b92.appspot.com',
+    iosBundleId: 'com.example.wealthifyMe',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyAzgNg1YU22r1nVFFscjdKeRqC7WmC9umk',
+    appId: '1:982938198507:ios:e16c30e6aa275e19a2b9ae',
+    messagingSenderId: '982938198507',
+    projectId: 'wealthifyme-b2b92',
+    storageBucket: 'wealthifyme-b2b92.appspot.com',
+    iosBundleId: 'com.example.wealthifyMe',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyD9-lzhSzKgDlE77_Rni1nu-scpmINZA0U',
+    appId: '1:982938198507:web:c9845e3c4238c34ba2b9ae',
+    messagingSenderId: '982938198507',
+    projectId: 'wealthifyme-b2b92',
+    authDomain: 'wealthifyme-b2b92.firebaseapp.com',
+    storageBucket: 'wealthifyme-b2b92.appspot.com',
+    measurementId: 'G-F2QDKSBBS4',
   );
 }

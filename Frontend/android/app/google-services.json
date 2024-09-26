@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "790551533803",
-    "project_id": "wealthify-me",
-    "storage_bucket": "wealthify-me.appspot.com"
+    "project_number": "982938198507",
+    "project_id": "wealthifyme-b2b92",
+    "storage_bucket": "wealthifyme-b2b92.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:790551533803:android:c4ac05efdabe127a8446ae",
+        "mobilesdk_app_id": "1:982938198507:android:cb18e04d45a40bb6a2b9ae",
         "android_client_info": {
           "package_name": "com.example.wealthify_me"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC3mmA1lGFnYCsR5jCloPs6_8Q-xzi8Vh4"
+          "current_key": "AIzaSyABY8quqrbOdDFxJ63EpoeB6kO1miOzlCY"
         }
       ],
       "services": {
