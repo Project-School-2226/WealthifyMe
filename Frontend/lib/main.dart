@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:wealthify_me/components/login.dart';
 import 'package:wealthify_me/expense_tracker.dart';
+import 'package:wealthify_me/auth_service.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -15,12 +16,20 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+      home: StreamBuilder(
+        stream: AuthService().userStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return const ExpenseTracker();
+          } else {
+            return const LoginPage();
+          }
+        },
+      ),
     );
   }
 }
