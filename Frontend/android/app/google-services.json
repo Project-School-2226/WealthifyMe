@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "982938198507",
+    "project_id": "wealthifyme-b2b92",
+    "storage_bucket": "wealthifyme-b2b92.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:982938198507:android:cb18e04d45a40bb6a2b9ae",
+        "android_client_info": {
+          "package_name": "com.example.wealthify_me"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "982938198507-m67v3rck5pc5sk74lppimi2dnphc19be.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABY8quqrbOdDFxJ63EpoeB6kO1miOzlCY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "982938198507-m67v3rck5pc5sk74lppimi2dnphc19be.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "982938198507-dhc6irtaqdlkpibltfsmdo7o2sj24e9m.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.wealthifyMe"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
