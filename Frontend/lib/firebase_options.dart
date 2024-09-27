@@ -64,6 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '982938198507',
     projectId: 'wealthifyme-b2b92',
     storageBucket: 'wealthifyme-b2b92.appspot.com',
+    iosClientId: '982938198507-dhc6irtaqdlkpibltfsmdo7o2sj24e9m.apps.googleusercontent.com',
     iosBundleId: 'com.example.wealthifyMe',
   );
 
@@ -73,6 +74,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '982938198507',
     projectId: 'wealthifyme-b2b92',
     storageBucket: 'wealthifyme-b2b92.appspot.com',
+    iosClientId: '982938198507-dhc6irtaqdlkpibltfsmdo7o2sj24e9m.apps.googleusercontent.com',
     iosBundleId: 'com.example.wealthifyMe',
   );
 
@@ -85,4 +87,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'wealthifyme-b2b92.appspot.com',
     measurementId: 'G-F2QDKSBBS4',
   );
+
 }
