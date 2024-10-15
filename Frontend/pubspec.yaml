@@ -40,6 +40,7 @@ dependencies:
   google_sign_in: ^6.2.1
   firebase_auth: ^5.2.0
   flutter_svg: ^2.0.10+1
+  fl_chart: ^0.69.0
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +73,7 @@ flutter:
     - assets/background2.jpg
     - assets/background3.png
     - assets/google_logo.svg
+    - assets/icons8-google.svg
 
   fonts:
     - family: 'Poppins'

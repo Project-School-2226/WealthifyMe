@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "982938198507-b9ekjh4l37ok17mhvlsn4fnk6rqi9flp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.wealthify_me",
+            "certificate_hash": "89cd0deedcc1b214784a7332d0450fe278d7c234"
+          }
+        },
+        {
           "client_id": "982938198507-m67v3rck5pc5sk74lppimi2dnphc19be.apps.googleusercontent.com",
           "client_type": 3
         }
