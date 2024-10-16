@@ -12,15 +12,7 @@ subprojects {
 subprojects {
     project.evaluationDependsOn(':app')
 }
-subprojects {
-    project.configurations.all {
-        resolutionStrategy.eachDependency { details ->
-            if (details.requested.group == 'org.jetbrains.kotlin') {
-                details.useVersion "1.8.22"
-            }
-        }
-    }
-}
+
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }

@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'dart:ui' as ui;
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart'; // New import for SVG
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -42,18 +38,18 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 0, 0, 0),
+      backgroundColor: const Color.fromARGB(255, 0, 0, 0),
       appBar: AppBar(
         title: const Text(
           'Wealthify',
           style: TextStyle(
-            color: Color.fromARGB(255, 255, 221, 0),
+            color: Color.fromARGB(57, 69, 221, 0),
             fontFamily: 'Poppins',
             fontSize: 30,
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Color.fromARGB(255, 9, 10, 11),
+        backgroundColor: const Color.fromARGB(255, 9, 10, 11),
       ),
       body: SafeArea(
         child: Stack(
@@ -74,9 +70,9 @@ class LoginPage extends StatelessWidget {
                   child: SingleChildScrollView(
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
-                        minHeight: MediaQuery.of(context).size.height - 
-                                   AppBar().preferredSize.height - 
-                                   MediaQuery.of(context).padding.top,
+                        minHeight: MediaQuery.of(context).size.height -
+                            AppBar().preferredSize.height -
+                            MediaQuery.of(context).padding.top,
                       ),
                       child: IntrinsicHeight(
                         child: Padding(
@@ -97,21 +93,26 @@ class LoginPage extends StatelessWidget {
                                           style: TextStyle(color: Colors.white),
                                           decoration: InputDecoration(
                                             enabledBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(5),
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
                                               borderSide: BorderSide(
-                                                  color: Colors.white, width: 0.3),
+                                                  color: Colors.white,
+                                                  width: 0.3),
                                             ),
                                             border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(5),
-                                              borderSide:
-                                                  BorderSide(color: Colors.white),
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                              borderSide: BorderSide(
+                                                  color: Colors.white),
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(5),
-                                              borderSide:
-                                                  const BorderSide(color: Colors.white),
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                              borderSide: const BorderSide(
+                                                  color: Colors.white),
                                             ),
-                                            fillColor: Color.fromARGB(255, 31, 30, 30),
+                                            fillColor:
+                                                Color.fromARGB(255, 31, 30, 30),
                                             contentPadding: EdgeInsets.all(20),
                                             filled: true,
                                             labelText: 'Username',
@@ -137,20 +138,25 @@ class LoginPage extends StatelessWidget {
                                           cursorColor: Colors.white,
                                           decoration: InputDecoration(
                                             enabledBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(5),
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
                                               borderSide: BorderSide(
-                                                  color: Colors.white, width: 0.2),
+                                                  color: Colors.white,
+                                                  width: 0.2),
                                             ),
                                             border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(5),
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(5),
-                                              borderSide:
-                                                  const BorderSide(color: Colors.white),
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                              borderSide: const BorderSide(
+                                                  color: Colors.white),
                                             ),
                                             focusColor: Colors.white,
-                                            fillColor: Color.fromARGB(255, 31, 30, 30),
+                                            fillColor:
+                                                Color.fromARGB(255, 31, 30, 30),
                                             contentPadding: EdgeInsets.all(20),
                                             filled: true,
                                             labelText: 'Password',
@@ -183,12 +189,14 @@ class LoginPage extends StatelessWidget {
                                                       BorderRadius.circular(10),
                                                 ),
                                               ),
-                                              side:
-                                                  MaterialStateProperty.all<BorderSide>(
-                                                const BorderSide(color: Colors.grey),
+                                              side: MaterialStateProperty.all<
+                                                  BorderSide>(
+                                                const BorderSide(
+                                                    color: Colors.grey),
                                               ),
                                               backgroundColor:
-                                                  MaterialStateProperty.all<Color>(
+                                                  MaterialStateProperty.all<
+                                                          Color>(
                                                       Colors.transparent),
                                             ),
                                             child: const Text(
@@ -226,25 +234,27 @@ class LoginPage extends StatelessWidget {
                                                 } else {
                                                   ScaffoldMessenger.of(context)
                                                       .showSnackBar(
-                                                        SnackBar(
-                                                            content: Text(
-                                                                'Sign in cancelled or failed')),
-                                                      );
+                                                    SnackBar(
+                                                        content: Text(
+                                                            'Sign in cancelled or failed')),
+                                                  );
                                                 }
                                               } catch (e) {
-                                                print('Error during sign in: $e');
+                                                print(
+                                                    'Error during sign in: $e');
                                                 ScaffoldMessenger.of(context)
                                                     .showSnackBar(
-                                                      SnackBar(
-                                                          content: Text(
-                                                              'Error during sign in: $e')),
-                                                    );
+                                                  SnackBar(
+                                                      content: Text(
+                                                          'Error during sign in: $e')),
+                                                );
                                               }
                                             },
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: Colors.white,
                                               shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(10),
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
                                               ),
                                             ),
                                             icon: SvgPicture.asset(
