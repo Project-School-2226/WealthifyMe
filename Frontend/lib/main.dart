@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:wealthify_me/components/login.dart';
-import 'package:wealthify_me/expense_tracker.dart';
-import 'package:wealthify_me/auth_service.dart';
+import 'package:wealthify_me/auth/main_page.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -20,16 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: StreamBuilder(
-        stream: AuthService().userStream,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return const ExpenseTracker();
-          } else {
-            return const LoginPage();
-          }
-        },
-      ),
+      home: MainPage(),
     );
   }
 }
