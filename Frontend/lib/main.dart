@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:wealthify_me/components/login.dart';
@@ -18,9 +20,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+      theme: ThemeData(
+      primarySwatch: Colors.blue,
+      scaffoldBackgroundColor: Color.fromARGB(200, 16,27,34),
+      visualDensity: VisualDensity.adaptivePlatformDensity,
+    ),
+      home: ExpenseTracker(),
     );
   }
 }
