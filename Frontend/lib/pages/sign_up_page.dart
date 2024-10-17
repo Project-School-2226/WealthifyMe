@@ -1,7 +1,10 @@
 import 'dart:ui';
-
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:wealthify_me/auth_service.dart';
 
 class SignUpPage extends StatefulWidget {
   final VoidCallback showLoginPage;
@@ -16,13 +19,33 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmpasswordController =
       TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   bool _isLoading = false;
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmpasswordController.dispose();
+    _usernameController.dispose();
     super.dispose();
+  }
+
+  Future<void> sendUserDataToBackend(String email, String username) async {
+    final url = Uri.parse(
+        'https://f0ac-2409-408c-1c1f-e39-b853-3549-7930-576f.ngrok-free.app/api/save'); // Replace with your API endpoint
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'username': username}),
+    );
+
+    if (response.statusCode == 200) {
+      // Successfully sent data to backend
+      print('User data sent to backend successfully');
+    } else {
+      // Failed to send data to backend
+      print('Failed to send user data to backend');
+    }
   }
 
   bool passwordConfirmed() {
@@ -34,8 +57,10 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  Future<void> signUp() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+  Future<void> signUp(BuildContext context) async {
+    if (_usernameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields')),
       );
@@ -48,10 +73,14 @@ class _SignUpPageState extends State<SignUpPage> {
 
     try {
       if (passwordConfirmed()) {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
+        UserCredential userCredential =
+            await AuthService().signUpWithEmailAndPassword(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+          _usernameController.text.trim(),
         );
+        // Send user data to backend
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Sign up successful!')),
         );
@@ -122,7 +151,55 @@ class _SignUpPageState extends State<SignUpPage> {
                                   padding: const EdgeInsets.all(10.0),
                                   child: Column(
                                     children: [
-                                      const SizedBox(height: 50),
+                                      const SizedBox(height: 30),
+                                      TextField(
+                                        controller: _usernameController,
+                                        autocorrect: true,
+                                        cursorColor: Colors.white,
+                                        style: const TextStyle(
+                                            color: Colors.white),
+                                        decoration: InputDecoration(
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(5),
+                                            borderSide: const BorderSide(
+                                                color: Colors.white,
+                                                width: 0.3),
+                                          ),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(5),
+                                            borderSide: const BorderSide(
+                                                color: Colors.white),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(5),
+                                            borderSide: const BorderSide(
+                                                color: Colors.white),
+                                          ),
+                                          fillColor: const Color.fromARGB(
+                                              255, 31, 30, 30),
+                                          contentPadding:
+                                              const EdgeInsets.all(20),
+                                          filled: true,
+                                          labelText: 'Username',
+                                          labelStyle: const TextStyle(
+                                              color: Color.fromARGB(
+                                                  255, 169, 169, 169),
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 20,
+                                              fontFamily: 'Poppins'),
+                                          floatingLabelBehavior:
+                                              FloatingLabelBehavior.auto,
+                                          floatingLabelAlignment:
+                                              FloatingLabelAlignment.start,
+                                          floatingLabelStyle: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 30),
                                       TextField(
                                         controller: _emailController,
                                         autocorrect: true,
@@ -170,7 +247,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                               fontWeight: FontWeight.w500),
                                         ),
                                       ),
-                                      const SizedBox(height: 40),
+                                      const SizedBox(height: 30),
                                       TextField(
                                         controller: _passwordController,
                                         autocorrect: true,
@@ -217,7 +294,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                               color: Colors.white),
                                         ),
                                       ),
-                                      const SizedBox(height: 40),
+                                      const SizedBox(height: 30),
                                       TextField(
                                         controller: _confirmpasswordController,
                                         autocorrect: true,
@@ -264,15 +341,16 @@ class _SignUpPageState extends State<SignUpPage> {
                                               color: Colors.white),
                                         ),
                                       ),
-                                      const SizedBox(height: 30),
+                                      const SizedBox(height: 40),
                                       SizedBox(
                                         width: double.infinity,
                                         height: 50,
                                         child: GestureDetector(
-                                          onTap: signUp,
+                                          onTap: () => signUp(context),
                                           child: ElevatedButton(
-                                            onPressed:
-                                                _isLoading ? null : signUp,
+                                            onPressed: _isLoading
+                                                ? null
+                                                : () => signUp(context),
                                             style: ButtonStyle(
                                               alignment: Alignment.center,
                                               shape: MaterialStateProperty.all<
@@ -344,6 +422,41 @@ class _SignUpPageState extends State<SignUpPage> {
                                             ),
                                           )
                                         ],
+                                      ),
+                                      const SizedBox(height: 20),
+                                      //google sign in button
+                                      ElevatedButton(
+                                        onPressed: () =>
+                                            AuthService().signInWitGoogle(),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Color.fromARGB(
+                                              255, 206, 206, 206),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                          ),
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: 12.0, horizontal: 24.0),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            SvgPicture.asset(
+                                              'assets/icons8-google.svg',
+                                              height: 24.0,
+                                              width: 24.0,
+                                            ),
+                                            const SizedBox(width: 12.0),
+                                            const Text(
+                                              'Sign in with Google',
+                                              style: TextStyle(
+                                                  fontSize: 14.0,
+                                                  color: Colors.black,
+                                                  fontFamily: 'Poppins',
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),
