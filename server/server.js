@@ -11,8 +11,10 @@ const app = express();
 const PORT = process.env.PORT || 64000;
 const URI = process.env.MONGODB_URI;
 
+//routes
+const userRoutes = require('./routes/save_user_details');
 
-// MongoDB connection
+
 mongoose
   .connect(URI)
   .then(() => {
@@ -38,7 +40,7 @@ app.use(
 );
 
 // Routes
-app.use("/auth", login);
+app.use("/api", userRoutes);
 
 
 app
