@@ -30,20 +30,37 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future signIn() async {
-    if (_isLoading) return;
-    setState(() => _isLoading = true);
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+  Future<void> signIn(BuildContext context) async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields')),
       );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      UserCredential userCredential =
+          await AuthService().signInWithEmailAndPassword(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sign in successful!')),
+      );
+      // Optionally, navigate to another page or update UI
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invalid email or password')),
+        SnackBar(content: Text('${e.toString()}')),
       );
     } finally {
-      setState(() => _isLoading = false);
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -233,10 +250,11 @@ class _LoginPageState extends State<LoginPage> {
                                         width: double.infinity,
                                         height: 50,
                                         child: GestureDetector(
-                                          onTap: signIn,
+                                          onTap: () => signIn(context),
                                           child: ElevatedButton(
-                                            onPressed:
-                                                _isLoading ? null : signIn,
+                                            onPressed: _isLoading
+                                                ? null
+                                                : () => signIn(context),
                                             style: ButtonStyle(
                                               alignment: Alignment.center,
                                               shape: MaterialStateProperty.all<
