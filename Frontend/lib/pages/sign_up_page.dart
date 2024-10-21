@@ -30,6 +30,24 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
+  Future<void> sendUserDataToBackend(String email, String username) async {
+    final url = Uri.parse(
+        'https://bbf8-2409-40f0-1121-1aa0-59ba-d398-793d-9bef.ngrok-free.app/api/save'); // Replace with your API endpoint
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'username': username,'user_id': FirebaseAuth.instance.currentUser!.uid}),
+    );
+
+    if (response.statusCode == 200) {
+      // Successfully sent data to backend
+      print('User data sent to backend successfully');
+    } else {
+      // Failed to send data to backend
+      print('Failed to send user data to backend');
+    }
+  }
+
   bool passwordConfirmed() {
     if (_passwordController.text.trim() ==
         _confirmpasswordController.text.trim()) {
