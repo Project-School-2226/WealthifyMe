@@ -11,7 +11,7 @@ class AuthService {
 
   Future<void> sendUserDataToBackend(String email, String displayName) async {
     final url = Uri.parse(
-        'https://bbf8-2409-40f0-1121-1aa0-59ba-d398-793d-9bef.ngrok-free.app/api/save'); // Replace with your API endpoint
+        'https://fea0-2409-408c-1ec0-947f-fc3e-cb6f-69fb-b8d3.ngrok-free.app/api/save'); // Replace with your API endpoint
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -73,22 +73,11 @@ class AuthService {
     UserCredential userCredential =
         await _firebaseauth.signInWithCredential(credential);
 
-    // Check if user is signing in for the first time
     if (userCredential.additionalUserInfo?.isNewUser ?? false) {
-      // Store user data in Firestore
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user?.uid)
-          .set({
-        'username': userCredential.user?.displayName ?? '',
-        'email': userCredential.user?.email ?? '',
-      });
-
-      // Send email and username to backend
       await sendUserDataToBackend(userCredential.user?.email ?? '',
           userCredential.user?.displayName ?? '');
     }
-
+    print(userCredential.additionalUserInfo?.isNewUser);
     return userCredential;
   }
 

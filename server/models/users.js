@@ -14,7 +14,11 @@ const userSchema = new mongoose.Schema({
     accountCreatedOn: {
         type: Date,
         default: Date.now
-    }  
+    },
+    uid:{
+        type: String,
+        required: true
+    }
     
 
 });
