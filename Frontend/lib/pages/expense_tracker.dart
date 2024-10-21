@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:wealthify_me/pages/add_expense.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class ExpenseTracker extends StatefulWidget {
   const ExpenseTracker({super.key});
@@ -13,11 +15,16 @@ class _ExpenseTrackerState extends State<ExpenseTracker> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+                  MaterialButton(
+            onPressed: () {
+              FirebaseAuth.instance.signOut();
+            },),
               Padding(
                 padding: const EdgeInsets.all(0.6),
                 child: Container(

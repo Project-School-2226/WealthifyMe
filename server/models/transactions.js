@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const transactionSchema = new mongoose.Schema({
+const transactionSchema = new Schema({
     user_id: {
         type:String,
         required: true
@@ -13,20 +13,24 @@ const transactionSchema = new mongoose.Schema({
     },
     amount: {
         type: Number,
-        required: true
+        required: true,
+        min: 0 // Prevent negative amounts
     },
     category_id: {
         type: Schema.Types.ObjectId,
         ref: 'Category',
-        required: false  // Category can be null
+        required: false // Category can be null
     },
     description: {
-        type: String
+        type: String,
+        trim: true // Remove whitespace from both ends
     },
     transaction_date: {
         type: Date,
         default: Date.now
     }
+}, {
+    timestamps: true // Automatically create createdAt and updatedAt fields
 });
 
 const Transaction = mongoose.model('Transaction', transactionSchema);
