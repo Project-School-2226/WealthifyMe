@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    uid:{
+    user_id:{
         type: String,
         required: true
     }
