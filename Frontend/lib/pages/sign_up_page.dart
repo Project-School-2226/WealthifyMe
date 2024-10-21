@@ -32,7 +32,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Future<void> sendUserDataToBackend(String email, String username) async {
     final url = Uri.parse(
-        'https://f0ac-2409-408c-1c1f-e39-b853-3549-7930-576f.ngrok-free.app/api/save'); // Replace with your API endpoint
+        'https://bbf8-2409-40f0-1121-1aa0-59ba-d398-793d-9bef.ngrok-free.app/api/save'); // Replace with your API endpoint
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -79,11 +79,10 @@ class _SignUpPageState extends State<SignUpPage> {
           _passwordController.text.trim(),
           _usernameController.text.trim(),
         );
+        setState(() {
+          _isLoading = false;
+        });
         // Send user data to backend
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sign up successful!')),
-        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Passwords do not match')),
@@ -91,13 +90,7 @@ class _SignUpPageState extends State<SignUpPage> {
       }
       // Optionally, navigate to another page or update UI
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${e.toString()}')),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      print(e);
     }
   }
 

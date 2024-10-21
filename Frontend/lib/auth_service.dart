@@ -11,7 +11,7 @@ class AuthService {
 
   Future<void> sendUserDataToBackend(String email, String displayName) async {
     final url = Uri.parse(
-        'https://f0ac-2409-408c-1c1f-e39-b853-3549-7930-576f.ngrok-free.app/api/save'); // Replace with your API endpoint
+        'https://bbf8-2409-40f0-1121-1aa0-59ba-d398-793d-9bef.ngrok-free.app/api/save'); // Replace with your API endpoint
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -46,27 +46,21 @@ class AuthService {
       password: password,
     );
 
-    // Update the display name in Firebase
     await userCredential.user?.updateDisplayName(username);
-
-    // Store user data in Firestore
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userCredential.user?.uid)
-        .set({
-      'username': username,
-      'email': email,
-    });
+    await sendUserDataToBackend(email, username);
 
     // Send email and username to backend
-    await sendUserDataToBackend(email, username);
 
     return userCredential;
   }
 
   Future<UserCredential?> signInWitGoogle() async {
-    final GoogleSignInAccount? guser = await GoogleSignIn().signIn();
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    // final GoogleSignInAccount? guser = await GoogleSignIn().signIn();
 
+    await googleSignIn.signOut();
+
+    final GoogleSignInAccount? guser = await googleSignIn.signIn();
     //user cancelled the sign in
     if (guser == null) return null;
 
