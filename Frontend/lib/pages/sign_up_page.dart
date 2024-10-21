@@ -36,7 +36,7 @@ class _SignUpPageState extends State<SignUpPage> {
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'username': username}),
+      body: jsonEncode({'email': email, 'username': username,'user_id': FirebaseAuth.instance.currentUser!.uid}),
     );
 
     if (response.statusCode == 200) {

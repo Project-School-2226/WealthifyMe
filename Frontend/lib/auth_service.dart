@@ -10,7 +10,8 @@ class AuthService {
   final user = FirebaseAuth.instance.currentUser;
   final user_id = FirebaseAuth.instance.currentUser?.uid;
 
-  Future<void> sendUserDataToBackend(String email, String displayName) async {
+  Future<void> sendUserDataToBackend(
+      String email, String displayName, String uid) async {
     final url = Uri.parse(
         'https://fea0-2409-408c-1ec0-947f-fc3e-cb6f-69fb-b8d3.ngrok-free.app/api/save'); // Replace with your API endpoint
     final response = await http.post(
@@ -46,9 +47,10 @@ class AuthService {
       email: email,
       password: password,
     );
-
     await userCredential.user?.updateDisplayName(username);
-    await sendUserDataToBackend(email, username);
+    String uid = userCredential.user!.uid;
+    
+    await sendUserDataToBackend(email, username, uid);
 
     // Send email and username to backend
 
@@ -75,8 +77,10 @@ class AuthService {
         await _firebaseauth.signInWithCredential(credential);
 
     if (userCredential.additionalUserInfo?.isNewUser ?? false) {
-      await sendUserDataToBackend(userCredential.user?.email ?? '',
-          userCredential.user?.displayName ?? '');
+      await sendUserDataToBackend(
+          userCredential.user?.email ?? '',
+          userCredential.user?.displayName ?? '',
+          userCredential.user?.uid ?? '');
     }
     print(userCredential.additionalUserInfo?.isNewUser);
     return userCredential;
