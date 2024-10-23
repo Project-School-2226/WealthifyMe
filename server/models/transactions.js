@@ -3,8 +3,7 @@ const Schema = mongoose.Schema;
 
 const transactionSchema = new mongoose.Schema({
     user_id: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
+        type:String,
         required: true
     },
     type: {
