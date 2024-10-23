@@ -12,7 +12,7 @@ class AuthService {
   Future<void> sendUserDataToBackend(
       String email, String displayName, String uid) async {
     final url = Uri.parse(
-        'https://fea0-2409-408c-1ec0-947f-fc3e-cb6f-69fb-b8d3.ngrok-free.app/api/save'); // Replace with your API endpoint
+        'https://dc4b-2409-408c-1ec0-947f-fc3e-cb6f-69fb-b8d3.ngrok-free.app/api/save'); // Replace with your API endpoint
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -52,7 +52,7 @@ class AuthService {
     );
     await userCredential.user?.updateDisplayName(username);
     String uid = userCredential.user!.uid;
-    
+
     await sendUserDataToBackend(email, username, uid);
 
     // Send email and username to backend
