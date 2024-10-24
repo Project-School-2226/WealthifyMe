@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Transaction = require('../models/Transaction');
 
-// Create a new transaction
 router.post('/transactions', async (req, res) => {
     const { user_id, type, amount, category_id, description, transaction_date } = req.body;
 
@@ -22,7 +21,6 @@ router.post('/transactions', async (req, res) => {
     }
 });
 
-// Read all transactions for a user
 router.get('/transactions/:user_id', async (req, res) => {
     const { user_id } = req.params;
 
@@ -34,7 +32,6 @@ router.get('/transactions/:user_id', async (req, res) => {
     }
 });
 
-// Update a transaction
 router.put('/transactions/:id', async (req, res) => {
     const { id } = req.params;
     const { type, amount, category_id, description, transaction_date } = req.body;
@@ -56,7 +53,6 @@ router.put('/transactions/:id', async (req, res) => {
     }
 });
 
-// Delete a transaction
 router.delete('/transactions/:id', async (req, res) => {
     const { id } = req.params;
 

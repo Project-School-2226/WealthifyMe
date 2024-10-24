@@ -8,6 +8,7 @@ class AuthService {
   final FirebaseAuth _firebaseauth = FirebaseAuth.instance;
   final userStream = FirebaseAuth.instance.authStateChanges();
   final user = FirebaseAuth.instance.currentUser;
+  final user_id = FirebaseAuth.instance.currentUser?.uid;
 
   Future<void> sendUserDataToBackend(String email, String displayName) async {
     final url = Uri.parse(
@@ -15,7 +16,7 @@ class AuthService {
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'username': displayName}),
+      body: jsonEncode({'user_id' : user_id,'email': email, 'username': displayName}),
     );
 
     if (response.statusCode == 200) {

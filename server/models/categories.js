@@ -4,17 +4,17 @@ const Schema = mongoose.Schema;
 const categorySchema = new Schema({
     user_id: {
         type: String,
-        required: true // Ensure user_id is always provided
+        required: true 
     },
     category_id: { 
         type: String,
         required: true,
-        unique: true // Ensure category
+        unique: true 
     },
     category_name: {
         type: String,
         required: true,
-        trim: true // Remove whitespace from both ends
+        trim: true 
     }
 }, {
     timestamps: true // Automatically create createdAt and updatedAt fields

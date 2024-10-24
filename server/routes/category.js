@@ -2,12 +2,11 @@ const express = require('express');
 const router = express.Router();
 const Category = require('../models/Category');
 
-// Create a new category
+//add a new category
 router.post('/new-category', async (req, res) => {
     const { user_id, category_name } = req.body;
 
     try {
-        // Check if the category already exists for the user
         const existingCategory = await Category.findOne({ user_id, category_name });
         if (existingCategory) {
             return res.status(400).json({ message: 'Category already exists' });
