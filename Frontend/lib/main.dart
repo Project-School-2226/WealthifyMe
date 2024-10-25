@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
       primarySwatch: Colors.blue,
       scaffoldBackgroundColor: Color.fromARGB(200, 16,27,34),
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         backgroundColor: Color.fromARGB(255, 16,27,34),
         titleTextStyle: TextStyle(
           color: Colors.yellow,
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
     ),
-      home: MainPage(),
+      home: const MainPage(),
     );
   }
 }

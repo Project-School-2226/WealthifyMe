@@ -7,12 +7,13 @@ import 'dart:convert';
 class AuthService {
   final FirebaseAuth _firebaseauth = FirebaseAuth.instance;
   final userStream = FirebaseAuth.instance.authStateChanges();
-  final user = FirebaseAuth.instance.currentUser;
   final user_id = FirebaseAuth.instance.currentUser?.uid;
+
+  
 
   Future<void> sendUserDataToBackend(String email, String displayName) async {
     final url = Uri.parse(
-        'https://bbf8-2409-40f0-1121-1aa0-59ba-d398-793d-9bef.ngrok-free.app/api/save'); // Replace with your API endpoint
+        'https://9a0a-2409-408c-1d46-6880-a158-6ad2-92cf-f8b1.ngrok-free.app/api/save');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -51,6 +52,7 @@ class AuthService {
     await sendUserDataToBackend(email, username);
 
     // Send email and username to backend
+    await sendUserDataToBackend(email, username);
 
     return userCredential;
   }
@@ -65,7 +67,7 @@ class AuthService {
     //user cancelled the sign in
     if (guser == null) return null;
 
-    final GoogleSignInAuthentication gAuth = await guser!.authentication;
+    final GoogleSignInAuthentication gAuth = await guser.authentication;
     final credential = GoogleAuthProvider.credential(
       accessToken: gAuth.accessToken,
       idToken: gAuth.idToken,
@@ -86,8 +88,8 @@ class AuthService {
       });
 
       // Send email and username to backend
-      await sendUserDataToBackend(userCredential.user?.email ?? '',
-          userCredential.user?.displayName ?? '');
+      await sendUserDataToBackend(
+          userCredential.user?.email ?? '', userCredential.user?.displayName ?? '');
     }
 
     return userCredential;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
@@ -18,12 +19,11 @@ class Dashboard extends StatelessWidget {
           ),
         ),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            child: const CircleAvatar(
-              radius: 16,
-              backgroundColor: Colors.grey,
-            ),
+          IconButton(
+            onPressed: () {
+              FirebaseAuth.instance.signOut();
+            },
+            icon: const Icon(Icons.padding_outlined),
           ),
         ],
       ),

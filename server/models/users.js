@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const { Category, defaultCategories } = require('./categories');
 
 const userSchema = new mongoose.Schema({
     user_id: {
@@ -14,6 +16,11 @@ const userSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true
+    },    
+    
+    categories: {
+        type: [Category.schema],
+        default: defaultCategories // Initialize with default categories
     },
     accountCreatedOn: {
         type: Date,
