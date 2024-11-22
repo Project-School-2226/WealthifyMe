@@ -23,8 +23,7 @@ const transactionSchema = new Schema({
         min: 0 // Prevent negative amounts
     },
     category_id: {
-        type: Schema.Types.ObjectId,
-        ref: 'Category',
+        type: String,
         required: false // Category can be null
     },
     description: {

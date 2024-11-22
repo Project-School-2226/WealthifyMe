@@ -1,29 +1,26 @@
 const mongoose = require('mongoose');
-const { v4: uuidv4 } = require('uuid');
 const Schema = mongoose.Schema;
 
-const categorySchema = new Schema({
-    category_id: { 
+const categorySchema = new Schema({ 
+    category_id: {
         type: String,
         required: true,
-        unique: true 
+        unique: true,
+        trim: true
     },
     category_name: {
         type: String,
         required: true,
-        trim: true 
+        trim: true
     },
     is_default: {
         type: Boolean,
-        default: false // Flag to indicate if the category is a default category
+        required: true
     }
-}, {
-    timestamps: true // Automatically create createdAt and updatedAt fields
 });
 
 const Category = mongoose.model('Category', categorySchema);
 
-// Default categories with fixed IDs
 const defaultCategories = [
     { category_id: '1', category_name: 'Food', is_default: true },
     { category_id: '2', category_name: 'Transport', is_default: true },
@@ -32,4 +29,23 @@ const defaultCategories = [
     { category_id: '5', category_name: 'Health', is_default: true }
 ];
 
-module.exports = { Category, defaultCategories };
+const initialiseDefaultCategoriesinDB = async () => { 
+    for (const category of defaultCategories) {
+        const existingCategory = await Category.findOne({ category_id: category.category_id });
+        if (!existingCategory) {
+            await new Category(category).save();
+        } else {
+            // Check if the existing category needs to be updated
+            if (existingCategory.category_name !== category.category_name || existingCategory.is_default !== category.is_default) {
+                existingCategory.category_name = category.category_name;
+                existingCategory.is_default = category.is_default;
+                await existingCategory.save();
+            }
+        }
+    }
+}
+
+module.exports = {
+    Category,
+    initialiseDefaultCategoriesinDB
+}
