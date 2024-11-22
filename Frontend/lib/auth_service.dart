@@ -7,25 +7,36 @@ import 'dart:convert';
 class AuthService {
   final FirebaseAuth _firebaseauth = FirebaseAuth.instance;
   final userStream = FirebaseAuth.instance.authStateChanges();
-  final user_id = FirebaseAuth.instance.currentUser?.uid;
-
-  
 
   Future<void> sendUserDataToBackend(String email, String displayName) async {
+    final user = FirebaseAuth.instance.currentUser;
+    final user_id = user?.uid;
+    if (user_id == null) {
+      print('User ID is null. User might not be signed in.');
+      return;
+    }
+    print(email + ' ' + displayName + ' ');
+    print(user_id);
     final url = Uri.parse(
-        'https://9a0a-2409-408c-1d46-6880-a158-6ad2-92cf-f8b1.ngrok-free.app/api/save');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'user_id' : user_id,'email': email, 'username': displayName}),
-    );
+        'https://ed84-2409-408c-1cb5-2cd9-809c-bb9e-8bd7-afed.ngrok-free.app/api/save');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(
+            {'user_id': user_id, 'email': email, 'username': displayName}),
+      );
 
-    if (response.statusCode == 200) {
-      // Successfully sent data to backend
-      print('User data sent to backend successfully');
-    } else {
-      // Failed to send data to backend
-      print('Failed to send user data to backend');
+      if (response.statusCode == 200) {
+        // Successfully sent data to backend
+        print('Successfully sent user data to backend');
+      } else {
+        // Failed to send data to backend
+        print(
+            'Failed to send user data to backend. Status code  ${response.body}');
+      }
+    } catch (e) {
+      print('Failed to send user data to backend.');
     }
   }
 
@@ -42,18 +53,19 @@ class AuthService {
 
   Future<UserCredential> signUpWithEmailAndPassword(
       String email, String password, String username) async {
-    UserCredential userCredential =
-        await _firebaseauth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    await userCredential.user?.updateDisplayName(username);
-    await sendUserDataToBackend(email, username);
+    try {
+      UserCredential userCredential =
+          await _firebaseauth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      await userCredential.user?.updateDisplayName(username);
 
-    // Send email and username to backend
-    await sendUserDataToBackend(email, username);
-
-    return userCredential;
+      await sendUserDataToBackend(email, username);
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      throw Exception(e.code);
+    }
   }
 
   Future<UserCredential?> signInWitGoogle() async {
@@ -75,19 +87,13 @@ class AuthService {
     UserCredential userCredential =
         await _firebaseauth.signInWithCredential(credential);
 
-    if (userCredential.additionalUserInfo?.isNewUser ?? false) {
-      // Store user data in Firestore
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user?.uid)
-          .set({
-        'username': userCredential.user?.displayName ?? '',
-        'email': userCredential.user?.email ?? '',
-      });
-
-      // Send email and username to backend
-      await sendUserDataToBackend(
-          userCredential.user?.email ?? '', userCredential.user?.displayName ?? '');
+    final isNewUser = userCredential.additionalUserInfo?.isNewUser ?? false;
+    print('isNewUser: $isNewUser');
+    if (isNewUser) {
+      final email = userCredential.user?.email ?? '';
+      final displayName = userCredential.user?.displayName ?? '';
+      print('Sending user data to backend: $email, $displayName');
+      await sendUserDataToBackend(email, displayName);
     }
 
     return userCredential;
