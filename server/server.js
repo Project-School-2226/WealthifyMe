@@ -10,6 +10,7 @@ const login = require("./auth/login");
 const app = express();
 const PORT = process.env.PORT || 64000;
 const URI = process.env.MONGODB_URI;
+const HOST = '192.168.99.60';
 
 //routes
 const userRoutes = require('./routes/save_user_details');
@@ -31,20 +32,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 // Enable CORS for all routes (for testing purposes)
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-  })
-);
+app.use(cors());
 
 // Routes
 app.use("/api", userRoutes);
 
 
 app
-  .listen(PORT, (res, req) => {
+  .listen(PORT,HOST, (res, req) => {
     console.log(`Server is running on port: ${PORT}`);
   })
   .on("error", (err) => {

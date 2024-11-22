@@ -2,7 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:wealthify_me/auth/auth_page.dart';
-import 'package:wealthify_me/pages/expense_tracker.dart';
+import 'package:wealthify_me/pages/dashboard.dart';
+import 'package:wealthify_me/pages/home_container.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
@@ -14,7 +15,7 @@ class MainPage extends StatelessWidget {
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return const ExpenseTracker();
+              return const HomeContainer();
             } else {
               return const AuthPage();
             }
