@@ -7,13 +7,16 @@ import 'dart:convert';
 class AuthService {
   final FirebaseAuth _firebaseauth = FirebaseAuth.instance;
   final userStream = FirebaseAuth.instance.authStateChanges();
-  final user = FirebaseAuth.instance.currentUser;
   final user_id = FirebaseAuth.instance.currentUser?.uid;
 
+  
+
+  
+
   Future<void> sendUserDataToBackend(
-      String email, String displayName, String uid) async {
+      String email, String displayName) async {
     final url = Uri.parse(
-        'https://fea0-2409-408c-1ec0-947f-fc3e-cb6f-69fb-b8d3.ngrok-free.app/api/save'); // Replace with your API endpoint
+        'https://9a0a-2409-408c-1d46-6880-a158-6ad2-92cf-f8b1.ngrok-free.app/api/save');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -48,11 +51,11 @@ class AuthService {
       password: password,
     );
     await userCredential.user?.updateDisplayName(username);
-    String uid = userCredential.user!.uid;
     
-    await sendUserDataToBackend(email, username, uid);
+    await sendUserDataToBackend(email, username);
 
     // Send email and username to backend
+    await sendUserDataToBackend(email, username);
 
     return userCredential;
   }
@@ -67,7 +70,7 @@ class AuthService {
     //user cancelled the sign in
     if (guser == null) return null;
 
-    final GoogleSignInAuthentication gAuth = await guser!.authentication;
+    final GoogleSignInAuthentication gAuth = await guser.authentication;
     final credential = GoogleAuthProvider.credential(
       accessToken: gAuth.accessToken,
       idToken: gAuth.idToken,
@@ -77,12 +80,20 @@ class AuthService {
         await _firebaseauth.signInWithCredential(credential);
 
     if (userCredential.additionalUserInfo?.isNewUser ?? false) {
+      // Store user data in Firestore
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user?.uid)
+          .set({
+        'username': userCredential.user?.displayName ?? '',
+        'email': userCredential.user?.email ?? '',
+      });
+
+      // Send email and username to backend
       await sendUserDataToBackend(
-          userCredential.user?.email ?? '',
-          userCredential.user?.displayName ?? '',
-          userCredential.user?.uid ?? '');
+          userCredential.user?.email ?? '', userCredential.user?.displayName ?? '');
     }
-    print(userCredential.additionalUserInfo?.isNewUser);
+
     return userCredential;
   }
 

@@ -10,7 +10,8 @@ const balanceSchema = new Schema({
     },
     balance :{
         type: int,
-        required: true
+        required: true,
+        default: 0
     }   
 });
 
