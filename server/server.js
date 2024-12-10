@@ -9,7 +9,7 @@ const jwt = require("jsonwebtoken");
 const app = express();
 const PORT = process.env.PORT || 64000;
 const URI = process.env.MONGODB_URI;
-const HOST = '192.168.109.60';
+const HOST = '192.0.0.2';
 const {initialiseDefaultCategoriesinDB} = require('./models/categories');
 
 //routes
@@ -33,7 +33,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 // Enable CORS for all routes (for testing purposes)
-app.use(cors());
+app.use(cors(
+  origin='*'
+));
 
 // Routes
 app.use("/api", userRoutes);

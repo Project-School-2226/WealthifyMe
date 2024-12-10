@@ -32,7 +32,7 @@ router.get('/usertransactions/:user_id', async (req, res) => {
     }
 });
 
-router.put('/transactions/:id', async (req, res) => {
+router.put('/updateTransactions/:id', async (req, res) => {
     const { id } = req.params;
     const { type, amount, category_id, description, transaction_date } = req.body;
 
@@ -53,7 +53,7 @@ router.put('/transactions/:id', async (req, res) => {
     }
 });
 
-router.delete('/transactions/:id', async (req, res) => {
+router.delete('/deleteTransactionById/:id', async (req, res) => {
     const { id } = req.params;
 
     try {

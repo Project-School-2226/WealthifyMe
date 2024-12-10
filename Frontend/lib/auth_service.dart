@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseauth = FirebaseAuth.instance;
@@ -17,8 +18,9 @@ class AuthService {
     }
     print(email + ' ' + displayName + ' ');
     print(user_id);
+    final baseUrl = dotenv.env['SERVER_URL']!;
     final url = Uri.parse(
-        'https://ed84-2409-408c-1cb5-2cd9-809c-bb9e-8bd7-afed.ngrok-free.app/api/save');
+       '$baseUrl/api/save');
     try {
       final response = await http.post(
         url,

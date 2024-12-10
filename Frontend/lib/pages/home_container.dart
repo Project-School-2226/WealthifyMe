@@ -15,7 +15,7 @@ class _HomeContainerState extends State<HomeContainer> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    Dashboard(),
+    TransactionsPage(),
     const Recommendations(),
     Chat(),
     Profile(),

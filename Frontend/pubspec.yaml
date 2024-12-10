@@ -43,6 +43,8 @@ dependencies:
   fl_chart: ^0.69.0
   http: ^1.2.2
   cloud_firestore: ^5.4.0
+  flutter_dotenv: ^5.2.1
+  intl: ^0.20.1
 
 dev_dependencies:
   flutter_test:
@@ -76,6 +78,7 @@ flutter:
     - assets/background3.png
     - assets/google_logo.svg
     - assets/icons8-google.svg
+    - .env
 
   fonts:
     - family: 'Poppins'
