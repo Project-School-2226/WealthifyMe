@@ -102,4 +102,44 @@ class AuthService {
   Future<void> signOut() async {
     await FirebaseAuth.instance.signOut();
   }
+
+  Future<void> addStockSymbolsToBackend(
+      List<String> selectedStockSymbols) async {
+    final user = FirebaseAuth.instance.currentUser;
+    final user_id = user?.uid; // Get the current user's UID
+
+    if (user_id == null) {
+      print("User is not logged in");
+      return;
+    }
+
+    final url = Uri.parse(
+        'https://literate-magpie-separately.ngrok-free.app/stocks/addStocks');
+    final payload = {
+      "user_id": user_id,
+      "stocks": selectedStockSymbols,
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(payload),
+      );
+
+      if (response.statusCode == 200) {
+        print("Stocks added successfully: ${response.body}");
+      } else {
+        print("Failed to add stocks: ${response.body}");
+      }
+    } catch (e) {
+      print("Error adding stocks: $e");
+    }
+  }
+
+  String? getUserId() {
+    final user = FirebaseAuth.instance.currentUser;
+    final user_id = user?.uid;
+    return user_id;
+  }
 }

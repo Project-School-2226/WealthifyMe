@@ -14,6 +14,7 @@ const HOST = '192.168.99.60';
 
 //routes
 const userRoutes = require('./routes/save_user_details');
+const stockRoutes = require('./routes/stocks');
 
 
 mongoose
@@ -36,10 +37,10 @@ app.use(cors());
 
 // Routes
 app.use("/api", userRoutes);
-
+app.use("/stocks",stockRoutes);
 
 app
-  .listen(PORT,HOST, (res, req) => {
+  .listen(PORT, (res, req) => {
     console.log(`Server is running on port: ${PORT}`);
   })
   .on("error", (err) => {
