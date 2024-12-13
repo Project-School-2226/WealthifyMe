@@ -24,7 +24,7 @@ const transactionSchema = new Schema({
     },
     category_id: {
         type: String,
-        required: false // Category can be null
+        required: true // Category can be null
     },
     description: {
         type: String,

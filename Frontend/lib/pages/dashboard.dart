@@ -237,148 +237,218 @@ Future<void> _fetchTransactions({int page = 1}) async {
   }
 
   void _showAddTransactionDialog() {
-    final _formKey = GlobalKey<FormState>();
-    String _type = 'Income';
-    double _amount = 0.0;
-    String? _categoryId;
-    String? _description;
+  final _formKey = GlobalKey<FormState>();
+  String _type = 'Income';
+  double _amount = 0.0;
+  String? _categoryId;
+  String? _description;
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            List<Category> _filteredCategories = _categories
-                .where((category) => category.categoryType == _type)
-                .toList();
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          List<Category> _filteredCategories = _categories
+              .where((category) => category.categoryType == _type)
+              .toList();
 
-            return BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-              child: AlertDialog(
-                backgroundColor: const Color.fromARGB(255, 67, 67, 70),
-                title: const Text(
-                  'Add New Transaction',
-                  style: TextStyle(color: Colors.white),
-                ),
-                content: Form(
-                  key: _formKey,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        DropdownButtonFormField<String>(
-                          value: _type,
-                          decoration: const InputDecoration(
-                              labelText: 'Transaction Type'),
-                          items: ['Income', 'Expense']
-                              .map((type) => DropdownMenuItem(
-                                    value: type,
-                                    child: Text(type),
-                                  ))
-                              .toList(),
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() {
-                                _type = value;
-                                _categoryId = null; // Reset category selection
-                              });
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 10),
-                        TextFormField(
-                          decoration:
-                              const InputDecoration(labelText: 'Amount'),
-                          keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter an amount';
-                            }
-                            if (double.tryParse(value) == null ||
-                                double.parse(value) <= 0) {
-                              return 'Enter a valid amount';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            _amount = double.parse(value!);
-                          },
-                        ),
-                        const SizedBox(height: 10),
-                        DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Category'),
-                          value: _categoryId,
-                          hint: const Text('Select a category'),
-                          items: _filteredCategories.isNotEmpty
-                              ? _filteredCategories
-                                  .map((category) => DropdownMenuItem(
-                                        value: category.categoryId,
-                                        child: Text(category.categoryName),
-                                      ))
-                                  .toList()
-                              : [
-                                  const DropdownMenuItem(
-                                      value: null,
-                                      child: Text('No categories available'))
-                                ],
-                          onChanged: (value) {
-                            setState(() {
-                              _categoryId = value;
-                            });
-                          },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Please select a category';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 10),
-                        TextFormField(
-                          decoration: const InputDecoration(
-                              labelText: 'Description (Optional)'),
-                          onSaved: (value) {
-                            _description = value;
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    child: const Text('Cancel'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  ElevatedButton(
-                    child: const Text('Add Transaction'),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _formKey.currentState!.save();
-                        _addTransaction(
-                          _type,
-                          _amount,
-                          _categoryId,
-                          _description,
-                          DateTime.now(),
-                        );
-                        Navigator.of(context).pop();
-                      }
-                    },
-                  ),
-                ], 
+          return BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+            child: AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.0),
               ),
-            );
-          },
-        );
-      },
-    );
-  }
-
+              backgroundColor: Color.fromARGB(0, 72, 85, 42),
+              title: const Text(
+                'Add New Transaction',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DropdownButtonFormField<String>(
+                        value: _type,
+                        decoration: const InputDecoration(
+                          labelText: 'Transaction Type',
+                          labelStyle: TextStyle(color: Colors.white70),
+                          filled: true,
+                          fillColor: Color(0xFF3A3A3C),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(10.0),
+                            ),
+                          ),
+                        ),
+                        dropdownColor: const Color(0xFF3A3A3C),
+                        style: const TextStyle(color: Colors.white),
+                        items: ['Income', 'Expense']
+                            .map((type) => DropdownMenuItem(
+                                  value: type,
+                                  child: Text(type),
+                                ))
+                            .toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              _type = value;
+                              _categoryId = null; // Reset category selection
+                            });
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 15),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: 'Amount',
+                          labelStyle: TextStyle(color: Colors.white70),
+                          filled: true,
+                          fillColor: Color(0xFF3A3A3C),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(10.0),
+                            ),
+                          ),
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        style: const TextStyle(color: Colors.white),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter an amount';
+                          }
+                          if (double.tryParse(value) == null ||
+                              double.parse(value) <= 0) {
+                            return 'Enter a valid amount';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          _amount = double.parse(value!);
+                        },
+                      ),
+                      const SizedBox(height: 15),
+                      DropdownButtonFormField<String>(
+                        decoration: const InputDecoration(
+                          labelText: 'Category',
+                          labelStyle: TextStyle(color: Colors.white70),
+                          filled: true,
+                          fillColor: Color(0xFF3A3A3C),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(10.0),
+                            ),
+                          ),
+                        ),
+                        dropdownColor: const Color(0xFF3A3A3C),
+                        style: const TextStyle(color: Colors.white),
+                        value: _categoryId,
+                        hint: const Text(
+                          'Select a category',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                        items: _filteredCategories.isNotEmpty
+                            ? _filteredCategories
+                                .map((category) => DropdownMenuItem(
+                                      value: category.categoryId,
+                                      child: Text(category.categoryName),
+                                    ))
+                                .toList()
+                            : [
+                                const DropdownMenuItem(
+                                  value: null,
+                                  child: Text(
+                                    'No categories available',
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
+                                ),
+                              ],
+                        onChanged: (value) {
+                          setState(() {
+                            _categoryId = value;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Please select a category';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 15),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: 'Description (Optional)',
+                          labelStyle: TextStyle(color: Colors.white70),
+                          filled: true,
+                          fillColor: Color(0xFF3A3A3C),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(10.0),
+                            ),
+                          ),
+                        ),
+                        style: const TextStyle(color: Colors.white),
+                        onSaved: (value) {
+                          _description = value;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      child: const Text('Add Transaction'),
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState!.save();
+                          _addTransaction(
+                            _type,
+                            _amount,
+                            _categoryId,
+                            _description,
+                            DateTime.now(),
+                          );
+                          Navigator.of(context).pop();
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
   Future<void> _addTransaction(String type, double amount, String? categoryId,
       String? description, DateTime transactionDate) async {
     try {
