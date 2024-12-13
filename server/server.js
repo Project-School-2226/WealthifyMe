@@ -9,12 +9,12 @@ const jwt = require("jsonwebtoken");
 const app = express();
 const PORT = process.env.PORT || 64000;
 const URI = process.env.MONGODB_URI;
-const HOST = '192.0.0.2';
 const {initialiseDefaultCategoriesinDB} = require('./models/categories');
 
 //routes
 const userRoutes = require('./routes/save_user_details');
 const transactionRoutes = require('./routes/transactions');
+const categories = require('./routes/category')
 
 
 mongoose
@@ -40,10 +40,11 @@ app.use(cors(
 // Routes
 app.use("/api", userRoutes);
 app.use("/transactions", transactionRoutes);
+app.use('/categories',categories)
 
 
 app
-  .listen(PORT,HOST, (res, req) => {
+  .listen(PORT, (res, req) => {
     console.log(`Server is running on port: ${PORT}`);
   })
   .on("error", (err) => {

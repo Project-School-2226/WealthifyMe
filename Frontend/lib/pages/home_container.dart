@@ -30,7 +30,7 @@ class _HomeContainerState extends State<HomeContainer> {
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+              padding: const EdgeInsets.only(bottom: 5, left: 16, right: 16),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(24),
                 child: BackdropFilter(
