@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const Transaction = require('../models/Transaction');
+const Transaction = require('../models/transactions');
 
-router.post('/transactions', async (req, res) => {
+router.post('/createtransaction', async (req, res) => {
     const { user_id, type, amount, category_id, description, transaction_date } = req.body;
 
     try {
@@ -21,7 +21,7 @@ router.post('/transactions', async (req, res) => {
     }
 });
 
-router.get('/transactions/:user_id', async (req, res) => {
+router.get('/usertransactions/:user_id', async (req, res) => {
     const { user_id } = req.params;
 
     try {
@@ -32,7 +32,7 @@ router.get('/transactions/:user_id', async (req, res) => {
     }
 });
 
-router.put('/transactions/:id', async (req, res) => {
+router.put('/updateTransactions/:id', async (req, res) => {
     const { id } = req.params;
     const { type, amount, category_id, description, transaction_date } = req.body;
 
@@ -53,7 +53,7 @@ router.put('/transactions/:id', async (req, res) => {
     }
 });
 
-router.delete('/transactions/:id', async (req, res) => {
+router.delete('/deleteTransactionById/:id', async (req, res) => {
     const { id } = req.params;
 
     try {

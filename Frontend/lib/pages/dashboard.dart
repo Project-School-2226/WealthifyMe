@@ -1,191 +1,252 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class Dashboard extends StatelessWidget {
-  const Dashboard({super.key});
+class TransactionsPage extends StatefulWidget {
+  const TransactionsPage({Key? key}) : super(key: key);
+
+  @override
+  _TransactionsPageState createState() => _TransactionsPageState();
+}
+
+class _TransactionsPageState extends State<TransactionsPage> {
+  // List to store transactions matching the new schema
+  List<Transaction> _transactions = [];
+  
+  // Boolean to track loading state
+  bool _isLoading = true;
+  
+  // Error message variable
+  String _errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch transactions when the page loads
+    _fetchTransactions();
+  }
+
+  Future<void> _fetchTransactions() async {
+    try {
+      // Get the current authenticated user
+      final User? currentUser = FirebaseAuth.instance.currentUser;
+      print(currentUser.toString());
+      
+      // Ensure user is authenticated
+      if (currentUser == null) {
+        setState(() {
+          _errorMessage = 'User not authenticated';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Get the user's Firebase UID
+      final String userId = currentUser.uid;
+
+      final baseUrl = dotenv.env['SERVER_URL']!;
+
+      // API endpoint URL with user ID parameter
+      final url = Uri.parse(
+        "$baseUrl/transactions/usertransactions/$userId"
+      );
+
+      // Make GET request 
+      final response = await http.get(url);
+
+      // Check if the request was successful
+      if (response.statusCode == 200) {
+        // Parse the JSON response
+        final List<dynamic> fetchedTransactionsData = json.decode(response.body);
+        
+        // Convert raw data to Transaction objects
+        final List<Transaction> parsedTransactions = fetchedTransactionsData
+            .map((transactionData) => Transaction.fromJson(transactionData))
+            .toList();
+        
+        // Update state with fetched transactions
+        setState(() {
+          _transactions = parsedTransactions;
+          _isLoading = false;
+        });
+      } else {
+        // Handle error scenario
+        setState(() {
+          _errorMessage = 'Failed to load transactions. Status code: ${response.statusCode}';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      // Handle network or parsing errors
+      setState(() {
+        _errorMessage = 'Error fetching transactions: $e';
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Home',
-          style: TextStyle(
-            fontSize: 28,
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        title: Text('My Transactions'),
         actions: [
+          // Optional: Add a refresh button
           IconButton(
-            onPressed: () {
-              FirebaseAuth.instance.signOut();
-            },
-            icon: const Icon(Icons.padding_outlined),
-          ),
+            icon: Icon(Icons.refresh),
+            onPressed: _fetchTransactions,
+          )
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: SizedBox(
-                height: 200,
-                width: 200,
-                child: Stack(
-                  children: [
-                    SizedBox(
-                      height: 200,
-                      width: 200,
-                      child: CircularProgressIndicator(
-                        value: 0.7,
-                        strokeWidth: 15,
-                        backgroundColor: Colors.purple.withOpacity(0.2),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Colors.green,
-                        ),
-                      ),
-                    ),
-                    const Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Text(
-                            '₹112,908',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Text(
-                            'Available balance',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Expenses',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    'See all',
-                    style: TextStyle(
-                      color: Colors.blue,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Expanded(
-              child: ListView(
-                children: [
-                  _buildExpenseItem(
-                    'Nike Air Max 2090',
-                    '09 Oct 2023',
-                    '₹16,999',
-                    Icons.sports_soccer,
-                  ),
-                  _buildExpenseItem(
-                    'iPad Pro',
-                    '10 Oct 2023',
-                    '₹79,999',
-                    Icons.tablet_mac,
-                  ),
-                  _buildExpenseItem(
-                    'Uber',
-                    '5 Mar 2023',
-                    '₹50.00',
-                    Icons.local_taxi,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      
-      
+      body: _buildBody(),
     );
   }
 
-  Widget _buildExpenseItem(
-    String title,
-    String date,
-    String amount,
-    IconData icon,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
+  Widget _buildBody() {
+    // Show loading indicator while fetching data
+    if (_isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    // Show error message if something went wrong
+    if (_errorMessage.isNotEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              _errorMessage,
+              style: TextStyle(color: Colors.red),
+              textAlign: TextAlign.center,
             ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 24,
+            ElevatedButton(
+              onPressed: _fetchTransactions,
+              child: Text('Retry'),
+            )
+          ],
+        ),
+      );
+    }
+
+    // No transactions found
+    if (_transactions.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.wallet_outlined, 
+              size: 100, 
+              color: Colors.grey[400]
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
+            SizedBox(height: 20),
+            Text(
+              'No transactions found',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 18,
+              ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Start adding transactions to track your financial activity',
+              style: TextStyle(
+                color: Colors.grey[500],
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Display transactions in a ListView
+    return ListView.builder(
+      itemCount: _transactions.length,
+      itemBuilder: (context, index) {
+        final transaction = _transactions[index];
+        return Card(
+          elevation: 4,
+          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: ListTile(
+            title: Text(
+              transaction.description ?? 'Unnamed Transaction',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: transaction.type == 'Income' ? Colors.green : Colors.red,
+              ),
+            ),
+            subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
+                  'Amount: \$${transaction.amount.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                Text(
-                  date,
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 12,
+                Text('Date: ${_formatDate(transaction.transactionDate)}'),
+                if (transaction.categoryId != null)
+                  Text(
+                    'Category: ${transaction.categoryId}',
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                    ),
                   ),
-                ),
               ],
             ),
-          ),
-          Text(
-            amount,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+            trailing: Text(
+              transaction.type,
+              style: TextStyle(
+                color: transaction.type == 'Income' ? Colors.green : Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-        ],
-      ),
+        );
+      },
+    );
+  }
+
+  // Helper method to format date
+  String _formatDate(DateTime date) {
+    return DateFormat('MM/dd/yyyy').format(date);
+  }
+}
+
+
+class Transaction {
+  final String userId;
+  final String transactionId;
+  final String type;
+  final double amount;
+  final String? categoryId;
+  final String? description;
+  final DateTime transactionDate;
+
+  Transaction({
+    required this.userId,
+    required this.transactionId,
+    required this.type,
+    required this.amount,
+    this.categoryId,
+    this.description,
+    required this.transactionDate,
+  });
+
+  // Factory constructor to create a Transaction from a JSON map
+  factory Transaction.fromJson(Map<String, dynamic> json) {
+    return Transaction(
+      userId: json['user_id'],
+      transactionId: json['transaction_id'],
+      type: json['type'],
+      amount: (json['amount'] as num).toDouble(),
+      categoryId: json['category_id'],
+      description: json['description'],
+      transactionDate: DateTime.parse(json['transaction_date']),
     );
   }
 }

@@ -12,6 +12,13 @@ class HomeContainer extends StatefulWidget {
 class _HomeContainerState extends State<HomeContainer> {
   int _selectedIndex = 0;
 
+  final List<Widget> _pages = [
+    TransactionsPage(),
+    const Recommendations(),
+    Chat(),
+    Profile(),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
