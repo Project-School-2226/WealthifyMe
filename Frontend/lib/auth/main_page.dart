@@ -24,9 +24,9 @@ class MainPage extends StatelessWidget {
                 creationTime.difference(lastSignInTime).inSeconds.abs() < 1;
 
             if (isFirstTime) { 
-              return const HomeContainer();
+              return  HomeContainer();
             } else {
-              return const HomeContainer();
+              return  HomeContainer();
             }
  
           } else {

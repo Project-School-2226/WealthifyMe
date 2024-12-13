@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart'; // Add this to your pubspec.yaml
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 class StockInsightsPage extends StatefulWidget {
   final String stockSymbol;
 
@@ -24,8 +24,9 @@ class _StockInsightsPageState extends State<StockInsightsPage> {
   }
 
   Future<void> _fetchStockData() async {
+    final baseUrl = dotenv.env['SERVER_URL'];
     final apiUrl =
-        'https://literate-magpie-separately.ngrok-free.app/stocks/getCurrentDayStockData?symbol=${widget.stockSymbol}';
+        '$baseUrl/stocks/getCurrentDayStockData?symbol=${widget.stockSymbol}';
 
     try {
       final response = await http.get(Uri.parse(apiUrl));

@@ -16,7 +16,7 @@ class _HomeContainerState extends State<HomeContainer> {
     TransactionsPage(),
     const Recommendations(),
     Chat(),
-    Profile(),
+    Stocks(),
   ];
 
   @override
@@ -25,10 +25,7 @@ class _HomeContainerState extends State<HomeContainer> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          Dashboard(),
-          Recommendations(),
-          Chat(),
-          Stocks(),
+          for (final page in _pages) page,
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

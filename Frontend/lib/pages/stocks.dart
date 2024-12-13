@@ -5,6 +5,7 @@ import 'package:wealthify_me/auth_service.dart';
 import 'package:wealthify_me/pages/stocks_insights_page.dart';
 import '../models/stock_symbol.dart';
 import 'stock_search_page.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Stocks extends StatefulWidget {
    // Pass user_id to this page
@@ -32,8 +33,9 @@ class _StocksState extends State<Stocks> {
     });
 
     try {
+      final baseUrl = dotenv.env['SERVER_URL']!;
       final url = Uri.parse(
-          'https://literate-magpie-separately.ngrok-free.app/stocks/getUserStocks?user_id=${userId}');
+          '$baseUrl/stocks/getUserStocks?user_id=${userId}');
       final response = await http.get(url, headers: {"Content-Type": "application/json"});
 
       if (response.statusCode == 200) {
