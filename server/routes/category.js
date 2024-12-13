@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Category = require('../models/Category');
+const {Category} = require('../models/categories');
+const {User} = require('../models/users')
 
 //add a new category
 router.post('/new-category', async (req, res) => {
@@ -20,15 +21,29 @@ router.post('/new-category', async (req, res) => {
     }
 });
 
-// Get all categories for a user
 router.get('/:user_id', async (req, res) => {
     const { user_id } = req.params;
-    
+
     try {
-        const categories = await Category.find({ user_id });
-        res.status(200).json(categories);
+        const userWithCategories = await User.aggregate([
+            { $match: { user_id } },
+            {
+                $lookup: {
+                    from: "categories", 
+                    localField: "categories",
+                    foreignField: "category_id",
+                    as: "categoriesInfo"
+                }
+            }
+        ]);
+
+        if (!userWithCategories.length) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json(userWithCategories[0].categoriesInfo);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching categories', error });
+        res.status(500).json({ message: 'Error fetching categories', error: error.message });
     }
 });
 

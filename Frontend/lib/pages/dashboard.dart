@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'filtered_data.dart';
 
 class Category {
   final String categoryId;
@@ -57,7 +58,6 @@ class Transaction {
     );
   }
 }
-
 class TransactionsPage extends StatefulWidget {
   const TransactionsPage({Key? key}) : super(key: key);
 
@@ -83,7 +83,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   void initState() {
     super.initState();
     _fetchInitialData();
-
+    
     // Add scroll listener for pagination
     _scrollController.addListener(_onScroll);
   }
@@ -95,8 +95,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels ==
-        _scrollController.position.maxScrollExtent) {
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
       _loadMoreTransactions();
     }
   }
@@ -163,12 +162,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
     }
   }
 
-  Future<void> _fetchTransactions({int page = 1}) async {
+Future<void> _fetchTransactions({int page = 1}) async {
     if (_isLoadingMore && page > 1) return;
 
     try {
       final User? currentUser = FirebaseAuth.instance.currentUser;
-
+      
       if (currentUser == null) {
         if (mounted) {
           setState(() {
@@ -181,8 +180,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
       final String userId = currentUser.uid;
       final baseUrl = dotenv.env['SERVER_URL']!;
-      final url = Uri.parse(
-          "$baseUrl/transactions/usertransactions/$userId?page=$page&limit=$_pageSize");
+      final url = Uri.parse("$baseUrl/transactions/usertransactions/$userId?page=$page&limit=$_pageSize");
 
       setState(() {
         page == 1 ? _isLoading = true : _isLoadingMore = true;
@@ -192,14 +190,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
-        final List<dynamic> fetchedTransactionsData =
-            responseData['transactions'];
+        final List<dynamic> fetchedTransactionsData = responseData['transactions'];
         final Map<String, dynamic> pagination = responseData['pagination'];
-
+        
         final List<Transaction> parsedTransactions = fetchedTransactionsData
             .map((transactionData) => Transaction.fromJson(transactionData))
             .toList();
-
+        
         if (mounted) {
           setState(() {
             if (page == 1) {
@@ -216,8 +213,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       } else {
         if (mounted) {
           setState(() {
-            _errorMessage =
-                'Failed to load transactions. Status code: ${response.statusCode}';
+            _errorMessage = 'Failed to load transactions. Status code: ${response.statusCode}';
             _isLoading = false;
             _isLoadingMore = false;
           });
@@ -374,7 +370,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       }
                     },
                   ),
-                ],
+                ], 
               ),
             );
           },
@@ -447,39 +443,39 @@ class _TransactionsPageState extends State<TransactionsPage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('My Transactions'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // The component to show above the list
-          // Expanded widget to contain the list
-          Expanded(
-            child: _buildBody(),
-          ),
-        ],
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.all(30.0),
-        child: FloatingActionButton(
-          onPressed: _showAddTransactionDialog,
-          child: Icon(Icons.add),
-          backgroundColor: Colors.blue,
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Text('My Transactions'),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.logout),
+          onPressed: () async {
+            await FirebaseAuth.instance.signOut();
+          },
         ),
+      ],
+    ),
+    body: Column(
+      children: [
+
+        // Expanded widget to contain the list
+        Expanded(
+          child: _buildBody(),
+        ),
+      ],
+    ),
+    floatingActionButton: Padding(
+      padding: const EdgeInsets.all(30.0),
+      child: FloatingActionButton(
+        onPressed: _showAddTransactionDialog,
+        child: Icon(Icons.add),
+        backgroundColor: Colors.blue,
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildBody() {
     // Show loading indicator while fetching initial data
@@ -513,8 +509,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.wallet_outlined,
-                size: 100, color: Color.fromARGB(255, 255, 255, 255)),
+            Icon(
+              Icons.wallet_outlined, 
+              size: 100, 
+              color: Color.fromARGB(255, 255, 255, 255)
+            ),
             SizedBox(height: 20),
             Text(
               'No transactions found',
@@ -558,7 +557,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   title: Text(
                     transaction.description ?? 'Unnamed Transaction',
                     style: TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.white),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white
+                    ),
                   ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -566,27 +567,27 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       Text(
                         'Amount: \$${transaction.amount.toStringAsFixed(2)}',
                         style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            color: Color.fromARGB(255, 162, 215, 164),
-                            fontSize: 24),
+                          fontWeight: FontWeight.w900,
+                          color: Color.fromARGB(255, 162, 215, 164),
+                          fontSize: 24
+                        ),
                       ),
-                      Text(
-                        'Date: ${_formatDate(transaction.transactionDate)}',
+                      Text('Date: ${_formatDate(transaction.transactionDate)}',
                         style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold),
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold
+                        ),
                       ),
                     ],
                   ),
                   trailing: Text(
                     transaction.type,
                     style: TextStyle(
-                        color: transaction.type == 'Income'
-                            ? const Color.fromARGB(255, 166, 221, 167)
-                            : Color.fromARGB(255, 254, 161, 154),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15),
+                      color: transaction.type == 'Income' ? const Color.fromARGB(255, 166, 221, 167) : Color.fromARGB(255, 254, 161, 154),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15
+                    ),
                   ),
                 ),
               );

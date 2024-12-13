@@ -9,13 +9,13 @@ const jwt = require("jsonwebtoken");
 const app = express();
 const PORT = process.env.PORT || 64000;
 const URI = process.env.MONGODB_URI;
-const HOST = '192.0.0.2';
 const {initialiseDefaultCategoriesinDB} = require('./models/categories');
 
 //routes
 const userRoutes = require('./routes/save_user_details');
 const stockRoutes = require('./routes/stocks');
 const transactionRoutes = require('./routes/transactions');
+const categories = require('./routes/category')
 
 
 mongoose
@@ -42,6 +42,7 @@ app.use(cors(
 app.use("/api", userRoutes);
 app.use("/stocks",stockRoutes);
 app.use("/transactions", transactionRoutes);
+app.use('/categories',categories)
 
 
 app
