@@ -6,13 +6,16 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 
-const login = require("./auth/login");
 const app = express();
 const PORT = process.env.PORT || 64000;
 const URI = process.env.MONGODB_URI;
+const {initialiseDefaultCategoriesinDB} = require('./models/categories');
 
 //routes
 const userRoutes = require('./routes/save_user_details');
+const stockRoutes = require('./routes/stocks');
+const transactionRoutes = require('./routes/transactions');
+const categories = require('./routes/category')
 
 
 mongoose
@@ -31,16 +34,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 // Enable CORS for all routes (for testing purposes)
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-  })
-);
+app.use(cors(
+  origin='*'
+));
 
 // Routes
 app.use("/api", userRoutes);
+app.use("/stocks",stockRoutes);
+app.use("/transactions", transactionRoutes);
+app.use('/categories',categories)
 
 
 app
