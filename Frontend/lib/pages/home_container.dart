@@ -4,6 +4,7 @@ import 'package:wealthify_me/pages/chat.dart';
 import 'package:wealthify_me/pages/dashboard.dart';
 import 'package:wealthify_me/pages/recommendations.dart';
 import 'package:wealthify_me/pages/stocks.dart';
+import 'package:wealthify_me/pages/settings.dart';
 
 class HomeContainer extends StatefulWidget {
   @override
@@ -16,9 +17,9 @@ class _HomeContainerState extends State<HomeContainer> {
   final List<Widget> _pages = [
     TransactionsPage(),
     const AnalyticsDashboard(),
-    const Recommendations(),
     Chat(),
     Stocks(),
+    const SettingsPage(),
   ];
 
   @override
@@ -45,16 +46,16 @@ class _HomeContainerState extends State<HomeContainer> {
           BottomNavigationBarItem(
               icon: Icon(Icons.analytics), label: 'Analytics'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.recommend),
-            label: 'Recommendations',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.chat),
             label: 'Chat',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.show_chart),
             label: 'Stocks',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
           ),
         ],
       ),

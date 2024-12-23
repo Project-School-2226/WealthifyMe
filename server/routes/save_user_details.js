@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { User, initialiseDefaultCategoriesForUser } = require('../models/users');
 const balance = require('../models/balance');
+const UserBudget = require('../models/userbudget');
 
 router.post('/save', async (req, res) => {
     const { user_id, email, username } = req.body;
@@ -34,16 +35,18 @@ router.post('/save', async (req, res) => {
 
 router.get('/userFirstTimeLogin/:user_id', async (req, res) => { 
     const { user_id } = req.params;
+
     try {
-        const user = await User.findOne({user_id});
-        console.log(user.user_id);
+        const user = await User.findOne({ user_id });
+
         if (!user) {
-            return res.status(404).json({message: 'User not found'});
+            return res.status(404).json({ error: 'User not found' });
         }
 
-        return res.status(200).json({firstTimeLogin: user.firstTimeLogin});
+        return res.status(200).json({ firstTime: user.firstTimeLogin });
     } catch (error) { 
-        return res.status(500).json({message: 'Error fetching user', error});
+        console.error('Error fetching user:', error);
+        return res.status(500).json({ error: 'Error fetching user', details: error.message });
     }
 });
 
@@ -69,6 +72,35 @@ router.post('/saveBalance', async (req, res) => {
         return res.status(201).json({ message: 'Balance created', balance: newBalance });
     } catch (error) {
         return res.status(500).json({ message: 'Error creating balance', error });
+    }
+});
+
+router.post('/saveUserBudget', async (req, res) => {
+    try {
+        const { user_id, budget } = req.body;
+        console.log(user_id, budget);
+
+        if (!user_id || !Array.isArray(budget) || budget.length === 0) {
+            return res.status(400).json({ error: 'Invalid input data' });
+        }
+
+        let userBudget = await UserBudget.findOne({ user_id });
+
+        if (userBudget) {
+            userBudget.budget = budget;
+            await userBudget.save();
+            return res.status(200).json({ message: 'Budget updated successfully'});
+        } else {
+            userBudget = new UserBudget({
+                user_id,
+                budget
+            });
+            await userBudget.save();
+            return res.status(201).json({ message: 'Budget created successfully'});
+        }
+    } catch (error) {
+        console.error('Error in /budget POST:', error);
+        return res.status(500).json({ error: 'Internal server error' });
     }
 });
 

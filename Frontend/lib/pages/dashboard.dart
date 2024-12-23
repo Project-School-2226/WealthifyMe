@@ -5,7 +5,9 @@ import 'dart:ui';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:wealthify_me/auth_service.dart';
 import 'filtered_data.dart';
+import 'welcome_page.dart';
 
 class Category {
   final String categoryId;
@@ -70,6 +72,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
   List<Category> _categories = [];
   bool _isLoading = true;
   String _errorMessage = '';
+  bool _isFirstTime = false;
+  bool _isCheckingFirstTime = true; // Add this variable
 
   // Pagination variables
   int _currentPage = 1;
@@ -83,6 +87,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   @override
   void initState() {
     super.initState();
+    _CheckFirstTimeLogin();
     _fetchInitialData();
     
     // Add scroll listener for pagination
@@ -112,6 +117,18 @@ class _TransactionsPageState extends State<TransactionsPage> {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _CheckFirstTimeLogin() async { 
+    try {
+      final response = await AuthService().checkFirstTimeLogin(FirebaseAuth.instance.currentUser!.uid);
+      setState(() {
+        _isFirstTime = response['firstTime'] as bool? ?? false;
+        _isCheckingFirstTime = false; // Mark as finished
+      });
+    } catch (error) {
+      print('Error checking first time login');
     }
   }
 
@@ -535,6 +552,16 @@ Future<void> _fetchTransactions({int page = 1}) async {
 
 @override
 Widget build(BuildContext context) {
+  if (_isCheckingFirstTime) {
+    return Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(), // Show loading until check completes
+      ),
+    );
+  }
+  if(_isFirstTime) {
+    return WelcomePage();
+  }
   return Scaffold(
     appBar: AppBar(
       title: Text('My Transactions'),

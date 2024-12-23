@@ -1,3 +1,4 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -146,4 +147,25 @@ class AuthService {
     final user_id = user?.uid;
     return user_id;
   }
+
+Future<Map<String, dynamic>> checkFirstTimeLogin(String userId) async {
+  try {
+    final url = Uri.parse('${dotenv.env['SERVER_URL']}/api/userFirstTimeLogin/$userId');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return {"firstTime": data['firstTime']};
+    } 
+    
+    if (response.statusCode == 404) {
+      return {"error": "User not found"};
+    }
+
+    return {"error": "An unexpected error occurred: ${response.statusCode}"};
+  } catch (e) {
+    return {"error": "An exception occurred: $e"};
+  }
 }
+}
+

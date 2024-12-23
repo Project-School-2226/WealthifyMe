@@ -32,60 +32,74 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<void> signIn(BuildContext context) async {
-  if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please fill in all fields')),
-    );
-    return;
-  }
-
-  setState(() {
-    _isLoading = true;
-  });
-
-  try {
-    UserCredential userCredential = await AuthService().signInWithEmailAndPassword(
-      _emailController.text.trim(),
-      _passwordController.text.trim(),
-    );
-
-    // Check if the user is logging in for the first time
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      // Check if the user account was created recently (first-time login)
-      bool isFirstTimeLogin = (user.metadata.creationTime != null && user.metadata.lastSignInTime != null) 
-          ? user.metadata.creationTime!.isAtSameMomentAs(user.metadata.lastSignInTime!)
-          : false;
-
-      if (isFirstTimeLogin) {
-        // Redirect to the onboarding page or any first-time page
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => WelcomePage()),
-        );
-      } else {
-        // Proceed to the dashboard if not the first login
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => HomeContainer()),
-        );
-      }
+Future<void> signIn(BuildContext context) async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields')),
+      );
+      return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Sign in successful!')),
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${e.toString()}')),
-    );
-  } finally {
     setState(() {
-      _isLoading = false;
+      _isLoading = true;
     });
+
+    try {
+      // Sign in user
+      await AuthService().signInWithEmailAndPassword(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+
+      if (!mounted) return;
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sign in successful!')),
+      );
+
+      // No navigation here - let MainPage handle the routing based on auth state
+      
+    } catch (e) {
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
-}
+  Future<void> signInWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await AuthService().signInWitGoogle();
+      
+      if (!mounted) return;
+
+      // No navigation here - let MainPage handle the routing
+      
+    } catch (e) {
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -353,8 +367,7 @@ class _LoginPageState extends State<LoginPage> {
                                       const SizedBox(height: 20),
                                       //google sign in button
                                       ElevatedButton(
-                                        onPressed: () =>
-                                             AuthService().signInWitGoogle(),
+                                        onPressed: _isLoading ? null : signInWithGoogle,
 
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Color.fromARGB(
