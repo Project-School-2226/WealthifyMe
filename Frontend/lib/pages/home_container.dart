@@ -15,7 +15,7 @@ class _HomeContainerState extends State<HomeContainer> {
   final List<Widget> _pages = [
     TransactionsPage(),
     const Recommendations(),
-    Chat(),
+    ChatScreen(),
     Stocks(),
   ];
 

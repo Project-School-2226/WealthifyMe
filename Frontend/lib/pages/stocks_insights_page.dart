@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:fl_chart/fl_chart.dart'; // Add this to your pubspec.yaml
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -38,7 +38,7 @@ class _StockInsightsPageState extends State<StockInsightsPage> {
         // Parse data points for the graph
         final dataPoints = candles.map<FlSpot>((candle) {
           final time = DateTime.parse(candle[0]).millisecondsSinceEpoch / 1000;
-          final closePrice = candle[4]; // 5th field: closing price
+          final closePrice = candle[4]; // 5th field for y-axis (Close price)
           return FlSpot(time.toDouble(), closePrice.toDouble());
         }).toList();
 
@@ -70,104 +70,102 @@ class _StockInsightsPageState extends State<StockInsightsPage> {
           ? const Center(
               child: CircularProgressIndicator(),
             )
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: LineChart(
-                LineChartData(
-                  gridData: FlGridData(
-                    show: true,
-                    drawHorizontalLine: true,
-                    drawVerticalLine: false,
-                    horizontalInterval: 50,
-                  ),
-                  titlesData: FlTitlesData(
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          DateTime date = DateTime.fromMillisecondsSinceEpoch(
-                              value.toInt() * 1000);
-                          return Text(
-                            "${date.hour}:${date.minute.toString().padLeft(2, '0')}",
-                            style: const TextStyle(
-                                color: Colors.grey, fontSize: 10),
-                          );
-                        },
-                        reservedSize: 20,
-                        interval: 3600, // Display labels every hour
-                      ),
-                    ),
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 40,
-                        getTitlesWidget: (value, meta) {
-                          return Text(
-                            '${value.toStringAsFixed(0)}',
-                            style: const TextStyle(
-                                color: Colors.grey, fontSize: 10),
-                          );
-                        },
-                        interval: 50, // Adjust y-axis intervals dynamically
-                      ),
-                    ),
-                    topTitles:
-                        AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles:
-                        AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  ),
-                  borderData: FlBorderData(
-                    show: true,
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: _dataPoints,
-                      isCurved: true,
-                      color: Colors.blueAccent,
-                      barWidth: 2,
-                      dotData: FlDotData(show: false),
-                      belowBarData: BarAreaData(
-                        show: true,
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.blueAccent.withOpacity(0.3),
-                            Colors.transparent
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ),
-                      ),
-                    ),
-                  ],
-                  lineTouchData: LineTouchData(
-                    touchTooltipData: LineTouchTooltipData(
-                      getTooltipItems: (spots) {
-                        return spots.map((spot) {
-                          DateTime date = DateTime.fromMillisecondsSinceEpoch(
-                              (spot.x * 1000).toInt());
-                          return LineTooltipItem(
-                            " ${date.hour}:${date.minute.toString().padLeft(2, '0')}\n"
-                            " Last: ${spot.y.toStringAsFixed(2)}",
-                            const TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold),
-                          );
-                        }).toList();
-                      },
-                    ),
-                    getTouchedSpotIndicator:
-                        (LineChartBarData barData, List<int> indicators) {
-                      return indicators.map((int index) {
-                        return TouchedSpotIndicatorData(
-                          FlLine(color: Colors.blueAccent, strokeWidth: 1),
-                          FlDotData(show: true),
-                        );
-                      }).toList();
-                    },
-                    touchCallback:
-                        (FlTouchEvent event, LineTouchResponse? response) {},
-                  ),
+          : SingleChildScrollView(
+              scrollDirection: Axis.horizontal, // Enable horizontal scrolling
+              child: Container(
+                width: MediaQuery.of(context).size.width * 1.5, // Adjust graph width
+                padding: const EdgeInsets.all(16.0),
+                child: LineChart(
+LineChartData(
+  gridData: FlGridData(
+    show: true,
+    drawHorizontalLine: true,
+    horizontalInterval:
+        (_dataPoints.map((e) => e.y).reduce((a, b) => a > b ? a : b) -
+                _dataPoints.map((e) => e.y).reduce((a, b) => a < b ? a : b)) /
+            5,
+  ),
+  titlesData: FlTitlesData(
+    leftTitles: AxisTitles(
+      sideTitles: SideTitles(
+        showTitles: true,
+        getTitlesWidget: (value, meta) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Text(
+              '\₹${value.toStringAsFixed(0)}',
+              style: TextStyle(
+                color: Colors.grey.shade700,
+                fontSize: 12,
+              ),
+            ),
+          );
+        },
+        reservedSize: 50,
+        interval: 50,
+      ),
+    ),
+    bottomTitles: AxisTitles(
+      sideTitles: SideTitles(
+        showTitles: true,
+        getTitlesWidget: (value, meta) {
+          final date = DateTime.fromMillisecondsSinceEpoch(
+              value.toInt() * 1000);
+          return Text(
+            "${date.hour}:${date.minute.toString().padLeft(2, '0')}",
+            style: TextStyle(
+              color: Colors.grey.shade700,
+              fontSize: 10,
+            ),
+          );
+        },
+        interval: (_dataPoints.length ~/ 6).toDouble(),
+      ),
+    ),
+  ),
+  lineBarsData: [
+    LineChartBarData(
+      spots: _dataPoints,
+      isCurved: true,
+      barWidth: 3,
+      color: Colors.blueAccent,
+      dotData: FlDotData(
+        show: false, // Remove dots
+      ),
+      belowBarData: BarAreaData(
+        show: true,
+        gradient: LinearGradient(
+          colors: [
+            Colors.blueAccent.withOpacity(0.3),
+            Colors.blueAccent.withOpacity(0.0),
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+    ),
+  ],
+  borderData: FlBorderData(show: true),
+  extraLinesData: ExtraLinesData(
+    horizontalLines: [
+      HorizontalLine(
+        y: _dataPoints.map((e) => e.y).reduce((a, b) => a + b) / _dataPoints.length,
+        color: Colors.redAccent,
+        strokeWidth: 2,
+        label: HorizontalLineLabel(
+          show: true,
+          alignment: Alignment.centerRight,
+          style: TextStyle(
+            color: Colors.redAccent,
+            fontSize: 10,
+          ),
+          labelResolver: (value) => "Avg Price",
+        ),
+      ),
+    ],
+  ),
+)
+
                 ),
               ),
             ),
