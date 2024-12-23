@@ -78,6 +78,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   bool _isLoadingMore = false;
 
   final ScrollController _scrollController = ScrollController();
+  final GlobalKey<DisplayBalanceState> _balanceKey = GlobalKey<DisplayBalanceState>();
 
   @override
   void initState() {
@@ -258,13 +259,13 @@ Future<void> _fetchTransactions({int page = 1}) async {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.0),
               ),
-              backgroundColor: Color.fromARGB(0, 72, 85, 42),
+              backgroundColor: const Color(0xFF2D2F41),
               title: const Text(
                 'Add New Transaction',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -278,39 +279,51 @@ Future<void> _fetchTransactions({int page = 1}) async {
                         value: _type,
                         decoration: const InputDecoration(
                           labelText: 'Transaction Type',
-                          labelStyle: TextStyle(color: Colors.white70),
+                          labelStyle: TextStyle(color: Colors.white),
                           filled: true,
-                          fillColor: Color(0xFF3A3A3C),
+                          fillColor: Color(0xFF42455A),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(
                               Radius.circular(10.0),
                             ),
                           ),
                         ),
-                        dropdownColor: const Color(0xFF3A3A3C),
+                        dropdownColor: const Color(0xFF42455A),
                         style: const TextStyle(color: Colors.white),
                         items: ['Income', 'Expense']
                             .map((type) => DropdownMenuItem(
                                   value: type,
-                                  child: Text(type),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        type == 'Income'
+                                            ? Icons.add
+                                            : Icons.remove,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Text(type),
+                                    ],
+                                  ),
                                 ))
                             .toList(),
                         onChanged: (value) {
                           if (value != null) {
                             setState(() {
                               _type = value;
-                              _categoryId = null; // Reset category selection
+                              _categoryId = null;
                             });
                           }
                         },
                       ),
-                      const SizedBox(height: 15),
+                      const SizedBox(height: 20),
                       TextFormField(
                         decoration: const InputDecoration(
                           labelText: 'Amount',
-                          labelStyle: TextStyle(color: Colors.white70),
+                          prefixIcon: Icon(Icons.attach_money, color: Colors.white),
+                          labelStyle: TextStyle(color: Colors.white),
                           filled: true,
-                          fillColor: Color(0xFF3A3A3C),
+                          fillColor: Color(0xFF42455A),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(
                               Radius.circular(10.0),
@@ -334,20 +347,21 @@ Future<void> _fetchTransactions({int page = 1}) async {
                           _amount = double.parse(value!);
                         },
                       ),
-                      const SizedBox(height: 15),
+                      const SizedBox(height: 20),
                       DropdownButtonFormField<String>(
                         decoration: const InputDecoration(
                           labelText: 'Category',
-                          labelStyle: TextStyle(color: Colors.white70),
+                          prefixIcon: Icon(Icons.category, color: Colors.white),
+                          labelStyle: TextStyle(color: Colors.white),
                           filled: true,
-                          fillColor: Color(0xFF3A3A3C),
+                          fillColor: Color(0xFF42455A),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(
                               Radius.circular(10.0),
                             ),
                           ),
                         ),
-                        dropdownColor: const Color(0xFF3A3A3C),
+                        dropdownColor: const Color(0xFF42455A),
                         style: const TextStyle(color: Colors.white),
                         value: _categoryId,
                         hint: const Text(
@@ -382,13 +396,14 @@ Future<void> _fetchTransactions({int page = 1}) async {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 15),
+                      const SizedBox(height: 20),
                       TextFormField(
                         decoration: const InputDecoration(
                           labelText: 'Description (Optional)',
-                          labelStyle: TextStyle(color: Colors.white70),
+                          prefixIcon: Icon(Icons.text_fields, color: Colors.white),
+                          labelStyle: TextStyle(color: Colors.white),
                           filled: true,
-                          fillColor: Color(0xFF3A3A3C),
+                          fillColor: Color(0xFF42455A),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(
                               Radius.circular(10.0),
@@ -411,7 +426,7 @@ Future<void> _fetchTransactions({int page = 1}) async {
                     TextButton(
                       child: const Text(
                         'Cancel',
-                        style: TextStyle(color: Colors.white70),
+                        style: TextStyle(color: Colors.redAccent),
                       ),
                       onPressed: () {
                         Navigator.of(context).pop();
@@ -419,12 +434,12 @@ Future<void> _fetchTransactions({int page = 1}) async {
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: Colors.greenAccent,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8.0),
                         ),
                       ),
-                      child: const Text('Add Transaction'),
+                      child: const Text('Save Transaction'),
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();
@@ -449,10 +464,12 @@ Future<void> _fetchTransactions({int page = 1}) async {
     },
   );
 }
+
   Future<void> _addTransaction(String type, double amount, String? categoryId,
       String? description, DateTime transactionDate) async {
     try {
       final User? currentUser = FirebaseAuth.instance.currentUser;
+      
 
       if (currentUser == null) {
         _showErrorSnackBar('User not authenticated');
@@ -480,6 +497,9 @@ Future<void> _fetchTransactions({int page = 1}) async {
       if (response.statusCode == 201) {
         // Refresh transactions
         await _fetchTransactions();
+
+        // Refresh balance
+        _balanceKey.currentState?.fetchBalance();
 
         // Show success message
         _showSuccessSnackBar('Transaction added successfully');
@@ -529,7 +549,8 @@ Widget build(BuildContext context) {
     ),
     body: Column(
       children: [
-
+        // Filtered data widget
+        DisplayBalance(key: _balanceKey),
         // Expanded widget to contain the list
         Expanded(
           child: _buildBody(),
@@ -537,7 +558,7 @@ Widget build(BuildContext context) {
       ],
     ),
     floatingActionButton: Padding(
-      padding: const EdgeInsets.all(30.0),
+      padding: const EdgeInsets.all(0.0),
       child: FloatingActionButton(
         onPressed: _showAddTransactionDialog,
         child: Icon(Icons.add),
@@ -635,7 +656,7 @@ Widget build(BuildContext context) {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Amount: \$${transaction.amount.toStringAsFixed(2)}',
+                        'Amount: ${transaction.amount.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           color: Color.fromARGB(255, 162, 215, 164),
@@ -677,8 +698,9 @@ Widget build(BuildContext context) {
     );
   }
 
-  // Helper method to format date
-  String _formatDate(DateTime date) {
-    return DateFormat('MM/dd/yyyy').format(date);
-  }
+
+String _formatDate(DateTime date) {
+  //at?
+  return DateFormat('dd/MM/yyyy hh:mm a').format(date.toLocal());
+}
 }

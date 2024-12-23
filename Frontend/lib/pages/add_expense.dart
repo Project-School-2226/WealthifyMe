@@ -12,7 +12,7 @@ class AddExpenseModal extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(0.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

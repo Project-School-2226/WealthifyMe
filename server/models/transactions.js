@@ -9,7 +9,7 @@ const transactionSchema = new Schema({
     },
     transaction_id : {
         type: String,
-        default: uuidv4(),
+        unique: true,
         required: true,
     },
     type: {

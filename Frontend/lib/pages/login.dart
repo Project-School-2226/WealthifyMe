@@ -7,7 +7,9 @@ import 'dart:ui';
 import 'package:flutter/widgets.dart';
 import 'package:wealthify_me/auth_service.dart';
 import 'package:wealthify_me/pages/forgot_password_page.dart';
-import 'package:flutter_svg/flutter_svg.dart'; // New import for SVG
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:wealthify_me/pages/home_container.dart';
+import 'package:wealthify_me/pages/welcome_page.dart'; // New import for SVG
 
 class LoginPage extends StatefulWidget {
   final VoidCallback showSignUpPage;
@@ -31,38 +33,59 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> signIn(BuildContext context) async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
-      );
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      UserCredential userCredential =
-          await AuthService().signInWithEmailAndPassword(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Sign in successful!')),
-      );
-      // Optionally, navigate to another page or update UI
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${e.toString()}')),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+  if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please fill in all fields')),
+    );
+    return;
   }
+
+  setState(() {
+    _isLoading = true;
+  });
+
+  try {
+    UserCredential userCredential = await AuthService().signInWithEmailAndPassword(
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
+
+    // Check if the user is logging in for the first time
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Check if the user account was created recently (first-time login)
+      bool isFirstTimeLogin = (user.metadata.creationTime != null && user.metadata.lastSignInTime != null) 
+          ? user.metadata.creationTime!.isAtSameMomentAs(user.metadata.lastSignInTime!)
+          : false;
+
+      if (isFirstTimeLogin) {
+        // Redirect to the onboarding page or any first-time page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => WelcomePage()),
+        );
+      } else {
+        // Proceed to the dashboard if not the first login
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeContainer()),
+        );
+      }
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sign in successful!')),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${e.toString()}')),
+    );
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
+  }
+}
 
   @override
   void dispose() {
@@ -331,7 +354,8 @@ class _LoginPageState extends State<LoginPage> {
                                       //google sign in button
                                       ElevatedButton(
                                         onPressed: () =>
-                                            AuthService().signInWitGoogle(),
+                                             AuthService().signInWitGoogle(),
+
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Color.fromARGB(
                                               255, 206, 206, 206),

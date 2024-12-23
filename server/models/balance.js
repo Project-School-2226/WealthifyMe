@@ -1,15 +1,16 @@
 const express = require('express')
-const Schema = mongoose.Schema
+const mongoose = require('mongoose')
 
 
 
-const balanceSchema = new Schema({
+const balanceSchema = new mongoose.Schema({
     user_id: {
         type: String,
+        unique: true,
         required: true 
     },
     balance :{
-        type: int,
+        type: Number,
         required: true,
         default: 0
     }   
@@ -17,5 +18,5 @@ const balanceSchema = new Schema({
 
 
 
-const Category = mongoose.model('balance', balanceSchema);
+const Balance = mongoose.model('balance', balanceSchema);
 module.exports = Balance

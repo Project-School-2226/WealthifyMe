@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 class StockSymbol {
@@ -26,8 +27,9 @@ class StockSymbol {
   static Future<void> fetchPricesForStocks(List<StockSymbol> stocks) async {
     try {
       final symbols = stocks.map((stock) => stock.symbol).toList();
+      final baseUrl  = dotenv.env['BASE_URL'];
       final url = Uri.parse(
-          'https://literate-magpie-separately.ngrok-free.app/stocks/getStockPrices');
+          '$baseUrl/stocks/getStockPrices');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wealthify_me/pages/analytics.dart';
 import 'package:wealthify_me/pages/chat.dart';
 import 'package:wealthify_me/pages/dashboard.dart';
 import 'package:wealthify_me/pages/recommendations.dart';
@@ -14,6 +15,7 @@ class _HomeContainerState extends State<HomeContainer> {
 
   final List<Widget> _pages = [
     TransactionsPage(),
+    const AnalyticsDashboard(),
     const Recommendations(),
     Chat(),
     Stocks(),
@@ -40,6 +42,8 @@ class _HomeContainerState extends State<HomeContainer> {
             icon: Icon(Icons.dashboard),
             label: 'Dashboard',
           ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.analytics), label: 'Analytics'),
           BottomNavigationBarItem(
             icon: Icon(Icons.recommend),
             label: 'Recommendations',

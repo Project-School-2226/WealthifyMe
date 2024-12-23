@@ -1,153 +1,127 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart'; // Add this dependency for charts
-import 'package:intl/intl.dart'; // For date formatting
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class FilteredData extends StatefulWidget {
+class DisplayBalance extends StatefulWidget {
+  const DisplayBalance({Key? key}) : super(key: key);
+  
   @override
-  _FilteredDataState createState() => _FilteredDataState();
+  DisplayBalanceState createState() => DisplayBalanceState();
 }
 
-class _FilteredDataState extends State<FilteredData> {
-  int _selectedButtonIndex = 0;
+class DisplayBalanceState extends State<DisplayBalance> {
+  String? balance;
+  final baseUrl = dotenv.env['SERVER_URL'];
+  final currentUser = FirebaseAuth.instance.currentUser;
 
-  // Dummy data for demonstration
-  final List<Map<String, dynamic>> transactions = [
-    {'date': '2024-12-01', 'amount': 150, 'category': 'Food'},
-    {'date': '2024-12-02', 'amount': 200, 'category': 'Transport'},
-    {'date': '2024-12-03', 'amount': 100, 'category': 'Food'},
-    {'date': '2024-12-04', 'amount': 50, 'category': 'Entertainment'},
-    {'date': '2024-12-05', 'amount': 300, 'category': 'Salary'},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    fetchBalance();
+  }
+
+  Future<void> fetchBalance() async {
+    if (currentUser == null) return;
+    final url = Uri.parse('$baseUrl/balance/${currentUser!.uid}');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (mounted) {
+          setState(() {
+            balance = data['balance']['balance'].toString();
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            balance = 'Error';
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          balance = 'Error';
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      child: Column(
-        children: [
-          // Buttons at the top
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _selectedButtonIndex = 0;
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text('Date Range Plot'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _selectedButtonIndex = 1;
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text('Category Pie Chart'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _selectedButtonIndex = 2;
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text('Other View'),
-                ),
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Center(
+        child: Container(
+          width: 400,
+          height: 150,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              colors: [
+                const Color.fromARGB(255, 194, 178, 87),
+                Color.fromARGB(255, 12, 22, 62)
               ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 20,
+                offset: Offset(0, 10),
+              )
+            ],
           ),
-          // Content based on the selected button
-          Expanded(
-            child: _selectedButtonIndex == 0
-                ? _buildDateRangePlot()
-                : _selectedButtonIndex == 1
-                    ? _buildCategoryPieChart()
-                    : _buildOtherView(),
+          child: Stack(
+            children: [
+              Positioned(
+                top: 20,
+                right: 20,
+                child: Icon(
+                  Icons.account_balance_wallet,
+                  color: Colors.white.withOpacity(0.3),
+                  size: 60,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Current Balance',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      balance == null
+                          ? 'Loading...'
+                          : balance == 'Error'
+                              ? 'Error'
+                              : '\$$balance',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDateRangePlot() {
-    List<FlSpot> dataPoints = [];
-    for (var transaction in transactions) {
-      DateTime date = DateFormat('yyyy-MM-dd').parse(transaction['date']);
-      dataPoints.add(
-        FlSpot(date.millisecondsSinceEpoch.toDouble(), transaction['amount'].toDouble()),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: LineChart(
-        LineChartData(
-          gridData: FlGridData(show: true),
-          titlesData: FlTitlesData(show: true),
-          borderData: FlBorderData(show: true),
-          lineBarsData: [
-            LineChartBarData(
-              spots: dataPoints,
-              isCurved: true,
-              color: Colors.blue,
-              belowBarData: BarAreaData(show: true, color: Colors.blue.withOpacity(0.3)),
-            ),
-          ],
         ),
       ),
     );
-  }
-
-  Widget _buildCategoryPieChart() {
-    Map<String, double> categoryTotals = {};
-    for (var transaction in transactions) {
-      String category = transaction['category'];
-      double amount = transaction['amount'];
-      categoryTotals[category] = (categoryTotals[category] ?? 0) + amount;
-    }
-
-    List<PieChartSectionData> sections = categoryTotals.entries
-        .map(
-          (entry) => PieChartSectionData(
-            value: entry.value,
-            color: Colors.primaries[categoryTotals.keys.toList().indexOf(entry.key) % Colors.primaries.length],
-            title: '${entry.key}: ${entry.value}',
-            radius: 50,
-            titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-        )
-        .toList();
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: PieChart(
-        PieChartData(
-          sections: sections,
-          borderData: FlBorderData(show: false),
-          sectionsSpace: 0,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOtherView() {
-    return Center(child: Text('Other View'));
   }
 }
