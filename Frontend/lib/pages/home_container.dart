@@ -16,12 +16,10 @@ class _HomeContainerState extends State<HomeContainer> {
 
   final List<Widget> _pages = [
     TransactionsPage(),
-    const AnalyticsDashboard(),
-    Chat(),
-    const Recommendations(),
+     AnalyticsDashboard(),
     ChatScreen(),
     Stocks(),
-    const SettingsPage(),
+     SettingsPage(),
   ];
 
   @override

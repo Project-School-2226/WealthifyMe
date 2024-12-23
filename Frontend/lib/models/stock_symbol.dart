@@ -29,7 +29,7 @@ class StockSymbol {
       final symbols = stocks.map((stock) => stock.symbol).toList();
       final baseUrl  = dotenv.env['BASE_URL'];
       final url = Uri.parse(
-          '$baseUrl/stocks/getStockPrices');
+          'https://literate-magpie-separately.ngrok-free.app/stocks/getStockPrices');
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
