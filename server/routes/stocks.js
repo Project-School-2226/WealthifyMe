@@ -1,6 +1,8 @@
 const express = require('express');
 const axios = require('axios');
 const router = express.Router();
+const { parse } = require('date-fns');
+const { DateTime, Duration } = require('luxon');
 require('dotenv').config();
 const findISIN = require('../stocks/symbols');
 const UserStocks = require('../models/stocksModel');
@@ -148,6 +150,46 @@ router.delete('/deleteStock', async (req, res) => {
     }
   } catch (error) {
     console.error('Error deleting stock:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+router.get('/getHistoricalData/:symbol', async (req, res) => {
+  const { symbol } = req.params;
+  console.log(symbol);
+  if (!symbol) {
+    return res.status(400).json({ error: 'Symbol parameter is required' });
+  }
+
+  const ISIN = findISIN(symbol);
+
+  if (!ISIN) {
+    return res.status(400).json({ error: 'Invalid symbol' });
+  }
+
+  try {
+    const parseInstrument = encodeURIComponent(`NSE_EQ|${ISIN}`);
+    const fromDate = DateTime.now().minus(Duration.fromObject({ days: 10000 })).toFormat('yyyy-MM-dd');
+    const toDate = DateTime.now().toFormat('yyyy-MM-dd');
+    console.log(parseInstrument, fromDate, toDate);
+    const url = `https://api.upstox.com/v2/historical-candle/${parseInstrument}/day/${toDate}/${fromDate}`;
+    const response = await axios.get(url, {
+      headers: {
+        'accept': 'application/json'
+      },
+      timeout: 5000
+    });
+    const candleRes = response.data;
+    if (candleRes.data && candleRes.data.candles && candleRes.data.candles.length > 0) {
+      const candleData = candleRes.data.candles;
+      res.json({ status: 'success', data: candleData });
+    } else {
+      console.log('No data', parseInstrument, candleRes);
+      res.status(404).json({ status: 'error', message: 'No historical data found' });
+    }
+  } catch (error) {
+    console.error(`Error in data fetch for ${symbol}:`, error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
