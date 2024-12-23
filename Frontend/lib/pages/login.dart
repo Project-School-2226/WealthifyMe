@@ -7,7 +7,9 @@ import 'dart:ui';
 import 'package:flutter/widgets.dart';
 import 'package:wealthify_me/auth_service.dart';
 import 'package:wealthify_me/pages/forgot_password_page.dart';
-import 'package:flutter_svg/flutter_svg.dart'; // New import for SVG
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:wealthify_me/pages/home_container.dart';
+import 'package:wealthify_me/pages/welcome_page.dart'; // New import for SVG
 
 class LoginPage extends StatefulWidget {
   final VoidCallback showSignUpPage;
@@ -30,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<void> signIn(BuildContext context) async {
+Future<void> signIn(BuildContext context) async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields')),
@@ -43,24 +45,59 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      UserCredential userCredential =
-          await AuthService().signInWithEmailAndPassword(
+      // Sign in user
+      await AuthService().signInWithEmailAndPassword(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
+      if (!mounted) return;
+
+      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Sign in successful!')),
       );
-      // Optionally, navigate to another page or update UI
+
+      // No navigation here - let MainPage handle the routing based on auth state
+      
     } catch (e) {
+      if (!mounted) return;
+      
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${e.toString()}')),
+        SnackBar(content: Text(e.toString())),
       );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+  Future<void> signInWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await AuthService().signInWitGoogle();
+      
+      if (!mounted) return;
+
+      // No navigation here - let MainPage handle the routing
+      
+    } catch (e) {
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -330,8 +367,8 @@ class _LoginPageState extends State<LoginPage> {
                                       const SizedBox(height: 20),
                                       //google sign in button
                                       ElevatedButton(
-                                        onPressed: () =>
-                                            AuthService().signInWitGoogle(),
+                                        onPressed: _isLoading ? null : signInWithGoogle,
+
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Color.fromARGB(
                                               255, 206, 206, 206),

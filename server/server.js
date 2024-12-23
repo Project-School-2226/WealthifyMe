@@ -16,6 +16,7 @@ const userRoutes = require('./routes/save_user_details');
 const stockRoutes = require('./routes/stocks');
 const transactionRoutes = require('./routes/transactions');
 const categories = require('./routes/category')
+const balanceRoutes = require('./routes/utils');
 
 
 mongoose
@@ -43,7 +44,7 @@ app.use("/api", userRoutes);
 app.use("/stocks",stockRoutes);
 app.use("/transactions", transactionRoutes);
 app.use('/categories',categories)
-
+app.use('/balance', balanceRoutes);
 
 app
   .listen(PORT, (res, req) => {

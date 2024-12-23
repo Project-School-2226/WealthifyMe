@@ -9,7 +9,7 @@ const transactionSchema = new Schema({
     },
     transaction_id : {
         type: String,
-        default: uuidv4(),
+        unique: true,
         required: true,
     },
     type: {
@@ -24,7 +24,7 @@ const transactionSchema = new Schema({
     },
     category_id: {
         type: String,
-        required: false // Category can be null
+        required: true // Category can be null
     },
     description: {
         type: String,

@@ -24,6 +24,10 @@ const userSchema = new Schema({
         type: String,
         required: true
     }],
+    firstTimeLogin: {
+        type: Boolean,
+        default: true
+    }
 })
 
 const initialiseDefaultCategoriesForUser = async (user_id) => { 

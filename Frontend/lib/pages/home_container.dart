@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:wealthify_me/pages/analytics.dart';
 import 'package:wealthify_me/pages/chat.dart';
 import 'package:wealthify_me/pages/dashboard.dart';
 import 'package:wealthify_me/pages/recommendations.dart';
 import 'package:wealthify_me/pages/stocks.dart';
+import 'package:wealthify_me/pages/settings.dart';
 
 class HomeContainer extends StatefulWidget {
   @override
@@ -14,9 +16,12 @@ class _HomeContainerState extends State<HomeContainer> {
 
   final List<Widget> _pages = [
     TransactionsPage(),
+    const AnalyticsDashboard(),
+    Chat(),
     const Recommendations(),
     ChatScreen(),
     Stocks(),
+    const SettingsPage(),
   ];
 
   @override
@@ -41,9 +46,7 @@ class _HomeContainerState extends State<HomeContainer> {
             label: 'Dashboard',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.recommend),
-            label: 'Recommendations',
-          ),
+              icon: Icon(Icons.analytics), label: 'Analytics'),
           BottomNavigationBarItem(
             icon: Icon(Icons.chat),
             label: 'Chat',
@@ -51,6 +54,10 @@ class _HomeContainerState extends State<HomeContainer> {
           BottomNavigationBarItem(
             icon: Icon(Icons.show_chart),
             label: 'Stocks',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
           ),
         ],
       ),

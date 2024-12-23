@@ -5,7 +5,9 @@ import 'dart:ui';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:wealthify_me/auth_service.dart';
 import 'filtered_data.dart';
+import 'welcome_page.dart';
 
 class Category {
   final String categoryId;
@@ -71,6 +73,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
   List<Category> _categories = [];
   bool _isLoading = true;
   String _errorMessage = '';
+  bool _isFirstTime = false;
+  bool _isCheckingFirstTime = true; // Add this variable
 
   // Pagination variables
   int _currentPage = 1;
@@ -79,10 +83,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
   bool _isLoadingMore = false;
 
   final ScrollController _scrollController = ScrollController();
+  final GlobalKey<DisplayBalanceState> _balanceKey = GlobalKey<DisplayBalanceState>();
 
   @override
   void initState() {
     super.initState();
+    _CheckFirstTimeLogin();
     _fetchInitialData();
 
     // Add scroll listener for pagination
@@ -113,6 +119,18 @@ class _TransactionsPageState extends State<TransactionsPage> {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _CheckFirstTimeLogin() async { 
+    try {
+      final response = await AuthService().checkFirstTimeLogin(FirebaseAuth.instance.currentUser!.uid);
+      setState(() {
+        _isFirstTime = response['firstTime'] as bool? ?? false;
+        _isCheckingFirstTime = false; // Mark as finished
+      });
+    } catch (error) {
+      print('Error checking first time login');
     }
   }
 
@@ -242,152 +260,238 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   void _showAddTransactionDialog() {
-    final _formKey = GlobalKey<FormState>();
-    String _type = 'Income';
-    double _amount = 0.0;
-    String? _categoryId;
-    String? _description;
+  final _formKey = GlobalKey<FormState>();
+  String _type = 'Income';
+  double _amount = 0.0;
+  String? _categoryId;
+  String? _description;
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            List<Category> _filteredCategories = _categories
-                .where((category) => category.categoryType == _type)
-                .toList();
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          List<Category> _filteredCategories = _categories
+              .where((category) => category.categoryType == _type)
+              .toList();
 
-            return BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-              child: AlertDialog(
-                backgroundColor: const Color.fromARGB(255, 67, 67, 70),
-                title: const Text(
-                  'Add New Transaction',
-                  style: TextStyle(color: Colors.white),
-                ),
-                content: Form(
-                  key: _formKey,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        DropdownButtonFormField<String>(
-                          value: _type,
-                          decoration: const InputDecoration(
-                              labelText: 'Transaction Type'),
-                          items: ['Income', 'Expense']
-                              .map((type) => DropdownMenuItem(
-                                    value: type,
-                                    child: Text(type),
-                                  ))
-                              .toList(),
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() {
-                                _type = value;
-                                _categoryId = null; // Reset category selection
-                              });
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 10),
-                        TextFormField(
-                          decoration:
-                              const InputDecoration(labelText: 'Amount'),
-                          keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter an amount';
-                            }
-                            if (double.tryParse(value) == null ||
-                                double.parse(value) <= 0) {
-                              return 'Enter a valid amount';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            _amount = double.parse(value!);
-                          },
-                        ),
-                        const SizedBox(height: 10),
-                        DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Category'),
-                          value: _categoryId,
-                          hint: const Text('Select a category'),
-                          items: _filteredCategories.isNotEmpty
-                              ? _filteredCategories
-                                  .map((category) => DropdownMenuItem(
-                                        value: category.categoryId,
-                                        child: Text(category.categoryName),
-                                      ))
-                                  .toList()
-                              : [
-                                  const DropdownMenuItem(
-                                      value: null,
-                                      child: Text('No categories available'))
-                                ],
-                          onChanged: (value) {
-                            setState(() {
-                              _categoryId = value;
-                            });
-                          },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Please select a category';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 10),
-                        TextFormField(
-                          decoration: const InputDecoration(
-                              labelText: 'Description (Optional)'),
-                          onSaved: (value) {
-                            _description = value;
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    child: const Text('Cancel'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  ElevatedButton(
-                    child: const Text('Add Transaction'),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _formKey.currentState!.save();
-                        _addTransaction(
-                          _type,
-                          _amount,
-                          _categoryId,
-                          _description,
-                          DateTime.now(),
-                        );
-                        Navigator.of(context).pop();
-                      }
-                    },
-                  ),
-                ],
+          return BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+            child: AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.0),
               ),
-            );
-          },
-        );
-      },
-    );
-  }
+              backgroundColor: const Color(0xFF2D2F41),
+              title: const Text(
+                'Add New Transaction',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DropdownButtonFormField<String>(
+                        value: _type,
+                        decoration: const InputDecoration(
+                          labelText: 'Transaction Type',
+                          labelStyle: TextStyle(color: Colors.white),
+                          filled: true,
+                          fillColor: Color(0xFF42455A),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(10.0),
+                            ),
+                          ),
+                        ),
+                        dropdownColor: const Color(0xFF42455A),
+                        style: const TextStyle(color: Colors.white),
+                        items: ['Income', 'Expense']
+                            .map((type) => DropdownMenuItem(
+                                  value: type,
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        type == 'Income'
+                                            ? Icons.add
+                                            : Icons.remove,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Text(type),
+                                    ],
+                                  ),
+                                ))
+                            .toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              _type = value;
+                              _categoryId = null;
+                            });
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: 'Amount',
+                          prefixIcon: Icon(Icons.attach_money, color: Colors.white),
+                          labelStyle: TextStyle(color: Colors.white),
+                          filled: true,
+                          fillColor: Color(0xFF42455A),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(10.0),
+                            ),
+                          ),
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        style: const TextStyle(color: Colors.white),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter an amount';
+                          }
+                          if (double.tryParse(value) == null ||
+                              double.parse(value) <= 0) {
+                            return 'Enter a valid amount';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          _amount = double.parse(value!);
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      DropdownButtonFormField<String>(
+                        decoration: const InputDecoration(
+                          labelText: 'Category',
+                          prefixIcon: Icon(Icons.category, color: Colors.white),
+                          labelStyle: TextStyle(color: Colors.white),
+                          filled: true,
+                          fillColor: Color(0xFF42455A),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(10.0),
+                            ),
+                          ),
+                        ),
+                        dropdownColor: const Color(0xFF42455A),
+                        style: const TextStyle(color: Colors.white),
+                        value: _categoryId,
+                        hint: const Text(
+                          'Select a category',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                        items: _filteredCategories.isNotEmpty
+                            ? _filteredCategories
+                                .map((category) => DropdownMenuItem(
+                                      value: category.categoryId,
+                                      child: Text(category.categoryName),
+                                    ))
+                                .toList()
+                            : [
+                                const DropdownMenuItem(
+                                  value: null,
+                                  child: Text(
+                                    'No categories available',
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
+                                ),
+                              ],
+                        onChanged: (value) {
+                          setState(() {
+                            _categoryId = value;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Please select a category';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: 'Description (Optional)',
+                          prefixIcon: Icon(Icons.text_fields, color: Colors.white),
+                          labelStyle: TextStyle(color: Colors.white),
+                          filled: true,
+                          fillColor: Color(0xFF42455A),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(10.0),
+                            ),
+                          ),
+                        ),
+                        style: const TextStyle(color: Colors.white),
+                        onSaved: (value) {
+                          _description = value;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.redAccent),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.greenAccent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      child: const Text('Save Transaction'),
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState!.save();
+                          _addTransaction(
+                            _type,
+                            _amount,
+                            _categoryId,
+                            _description,
+                            DateTime.now(),
+                          );
+                          Navigator.of(context).pop();
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
 
   Future<void> _addTransaction(String type, double amount, String? categoryId,
       String? description, DateTime transactionDate) async {
     try {
       final User? currentUser = FirebaseAuth.instance.currentUser;
+      
 
       if (currentUser == null) {
         _showErrorSnackBar('User not authenticated');
@@ -415,6 +519,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
       if (response.statusCode == 201) {
         // Refresh transactions
         await _fetchTransactions();
+
+        // Refresh balance
+        _balanceKey.currentState?.fetchBalance();
 
         // Show success message
         _showSuccessSnackBar('Transaction added successfully');
@@ -448,38 +555,50 @@ class _TransactionsPageState extends State<TransactionsPage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+@override
+Widget build(BuildContext context) {
+  if (_isCheckingFirstTime) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('My Transactions'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Expanded widget to contain the list
-          Expanded(
-            child: _buildBody(),
-          ),
-        ],
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.all(0.0),
-        child: FloatingActionButton(
-          onPressed: _showAddTransactionDialog,
-          child: Icon(Icons.add),
-          backgroundColor: Colors.blue,
-        ),
+      body: Center(
+        child: CircularProgressIndicator(), // Show loading until check completes
       ),
     );
   }
+  if(_isFirstTime) {
+    return WelcomePage();
+  }
+  return Scaffold(
+    appBar: AppBar(
+      title: Text('My Transactions'),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.logout),
+          onPressed: () async {
+            await FirebaseAuth.instance.signOut();
+          },
+        ),
+      ],
+    ),
+    body: Column(
+      children: [
+        // Filtered data widget
+        DisplayBalance(key: _balanceKey),
+        // Expanded widget to contain the list
+        Expanded(
+          child: _buildBody(),
+        ),
+      ],
+    ),
+    floatingActionButton: Padding(
+      padding: const EdgeInsets.all(0.0),
+      child: FloatingActionButton(
+        onPressed: _showAddTransactionDialog,
+        child: Icon(Icons.add),
+        backgroundColor: Colors.blue,
+      ),
+    ),
+  );
+}
 
   Widget _buildBody() {
     // Show loading indicator while fetching initial data
@@ -564,7 +683,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Amount: \₹${transaction.amount.toStringAsFixed(2)}',
+                        'Amount: ${transaction.amount.toStringAsFixed(2)}',
                         style: TextStyle(
                             fontWeight: FontWeight.w900,
                             color: Color.fromARGB(255, 162, 215, 164),
@@ -606,8 +725,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
     );
   }
 
-  // Helper method to format date
-  String _formatDate(DateTime date) {
-    return DateFormat('MM/dd/yyyy').format(date);
-  }
+
+String _formatDate(DateTime date) {
+  //at?
+  return DateFormat('dd/MM/yyyy hh:mm a').format(date.toLocal());
+}
 }

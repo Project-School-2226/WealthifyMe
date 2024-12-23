@@ -3,6 +3,7 @@ const balance = require('../models/balance');
 
 const router = express.Router();
 
+
 router.get('/:user_id', async (req, res) => { 
     const { user_id } = req.params;
     try {
@@ -15,3 +16,5 @@ router.get('/:user_id', async (req, res) => {
         res.status(500).json({ message: 'Error fetching balance', error });
     }
 });
+
+module.exports = router;
