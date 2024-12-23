@@ -555,6 +555,77 @@ class _TransactionsPageState extends State<TransactionsPage> {
     }
   }
 
+  Future<void> _fetchDataAndShowDialog() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    final url = 'https://serval-generous-eagle.ngrok-free.app/llm/summary/${user?.uid}'; // Replace with your URL
+
+    try {
+      // Make the GET request
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonData = jsonDecode(response.body);
+        final data = jsonData['response'];
+
+        _showResponseDialog(data.toString()); 
+      } else {
+        _showResponseDialog('Failed to load data. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      _showResponseDialog('An error occurred: $error');
+    }
+  }
+
+void _showResponseDialog(String responseMessage) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Color(0xFF2C3E50), // Dark background for a sleek look
+        title: Text(
+          'Summary',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        content: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              responseMessage,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                height: 1.5, // Line height for better readability
+              ),
+            ),
+          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0), // Rounded corners for the dialog
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text(
+              'Close',
+              style: TextStyle(
+                color: Color(0xFF3498DB), // Blue color for the button
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 @override
 Widget build(BuildContext context) {
   if (_isCheckingFirstTime) {
@@ -572,11 +643,9 @@ Widget build(BuildContext context) {
       title: Text('My Transactions'),
       actions: [
         IconButton(
-          icon: Icon(Icons.logout),
-          onPressed: () async {
-            await FirebaseAuth.instance.signOut();
-          },
-        ),
+            icon: Icon(Icons.summarize_outlined, color: Colors.white),
+            onPressed: _fetchDataAndShowDialog, // Call the function when pressed
+          ),
       ],
     ),
     body: Column(
@@ -600,11 +669,13 @@ Widget build(BuildContext context) {
   );
 }
 
+
   Widget _buildBody() {
     // Show loading indicator while fetching initial data
     if (_isLoading) {
       return Center(child: CircularProgressIndicator());
     }
+
 
     // Show error message if something went wrong
     if (_errorMessage.isNotEmpty) {
