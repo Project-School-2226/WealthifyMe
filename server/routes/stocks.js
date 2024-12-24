@@ -105,28 +105,53 @@ router.post("/addStocks", async (req, res) => {
 
 // Fetch stocks for a specific user
 router.get('/getUserStocks', async (req, res) => {
-  const { user_id } = req.query; // Get user_id from query parameters
+  const { user_id } = req.query;
+
+  if (!user_id) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
 
   try {
-    // Find the user's stocks using the user_id
     const userStocks = await UserStocks.findOne({ user_id });
-
+    console.log(userStocks);
     if (!userStocks) {
-      return res.status(404).json({
-        status: 'failure',
-        message: 'User not found or no stocks associated',
-      });
+      return res.status(404).json({ status: 'error', message: 'User stocks not found' });
     }
 
-    return res.json({
-      status: 'success',
-      stocks: userStocks.stocks, // Return the stocks array
-    });
+    res.json({ status: 'success', stocks: userStocks.stocks });
   } catch (error) {
     console.error('Error fetching user stocks:', error);
-    res.status(500).json({ status: 'failure', error: 'Failed to fetch user stocks' });
+    res.status(500).json({ status: 'error', message: 'Failed to fetch user stocks' });
   }
 });
+router.delete('/deleteStock', async (req, res) => {
+  try {
+    const { user_id, symbol } = req.query;
+
+    // Validation
+    if (!user_id || !symbol) {
+      return res.status(400).json({ error: 'Missing user_id or symbol' });
+    }
+
+    // Delete the stock from the database
+    const result = await UserStocks.updateOne(
+      { user_id: user_id },
+      { $pull: { stocks: symbol } } // Remove the stock symbol from the "stocks" array
+    );
+
+    if (result.modifiedCount > 0) {
+      return res.status(200).json({ message: 'Stock deleted successfully' });
+    } else {
+      return res
+        .status(404)
+        .json({ error: 'Stock not found or user does not exist' });
+    }
+  } catch (error) {
+    console.error('Error deleting stock:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 
 

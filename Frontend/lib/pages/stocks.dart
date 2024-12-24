@@ -8,8 +8,6 @@ import 'stock_search_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Stocks extends StatefulWidget {
-   // Pass user_id to this page
-
   const Stocks({Key? key}) : super(key: key);
 
   @override
@@ -17,14 +15,15 @@ class Stocks extends StatefulWidget {
 }
 
 class _StocksState extends State<Stocks> {
-
   List<StockSymbol> _allSymbols = [];
   bool _isFetching = false;
   String? userId = AuthService().getUserId();
+
   @override
   void initState() {
     super.initState();
     _fetchUserStocks(); // Fetch user stocks on page load
+    _fetchLatestPrices(); // Fetch latest prices for user stocks
   }
 
   Future<void> _fetchUserStocks() async {
@@ -34,25 +33,38 @@ class _StocksState extends State<Stocks> {
 
     try {
       final baseUrl = dotenv.env['SERVER_URL']!;
-      final url = Uri.parse(
-          '$baseUrl/stocks/getUserStocks?user_id=${userId}');
-      final response = await http.get(url, headers: {"Content-Type": "application/json"});
+      final url = Uri.parse('$baseUrl/stocks/getUserStocks?user_id=$userId');
+      final response =
+          await http.get(url, headers: {"Content-Type": "application/json"});
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final List<dynamic> fetchedSymbols =
+            json.decode(response.body)['stocks'];
 
-        if (data['status'] == 'success') {
-          final fetchedStocks = (data['stocks'] as List)
-              .map((json) => StockSymbol.fromJson(json))
-              .toList();
+        // Load symbols.json from assets
+        String jsonString = await DefaultAssetBundle.of(context)
+            .loadString('assets/symbols.json');
+        List<dynamic> jsonList = json.decode(jsonString);
 
-          setState(() {
-            _allSymbols = fetchedStocks;
-          });
+        // Map fetched symbols to their corresponding company names
+        List<StockSymbol> fetchedStocks = fetchedSymbols.map((symbol) {
+          final stockData = jsonList.firstWhere(
+              (json) => json['SYMBOL'] == symbol,
+              orElse: () => null);
+          return StockSymbol(
+            symbol: symbol,
+            companyName:
+                stockData != null ? stockData['NAME OF COMPANY'] : 'Unknown',
+            isin: stockData != null ? stockData['ISIN NUMBER'] : 'Unknown',
+          );
+        }).toList();
 
-          // Fetch prices for all stocks
-          await StockSymbol.fetchPricesForStocks(_allSymbols);
-        }
+        setState(() {
+          _allSymbols = fetchedStocks;
+        });
+
+        // Fetch prices for all stocks
+        await StockSymbol.fetchPricesForStocks(_allSymbols);
       } else {
         print("Error fetching user stocks: ${response.body}");
       }
@@ -78,9 +90,8 @@ class _StocksState extends State<Stocks> {
   }
 
   Future<void> _addNewStocks(List<StockSymbol> selectedStocks) async {
-    // Filter out already added stocks
     final newStocks = selectedStocks
-        .where((stock) => !_allSymbols.contains(stock))
+        .where((stock) => !_allSymbols.any((s) => s.symbol == stock.symbol))
         .toList();
 
     if (newStocks.isNotEmpty) {
@@ -93,8 +104,37 @@ class _StocksState extends State<Stocks> {
     }
   }
 
+  Future<void> _deleteStock(StockSymbol stock) async {
+    try {
+      final baseUrl = dotenv.env['SERVER_URL']!;
+      final url = Uri.parse(
+          '$baseUrl/stocks/deleteStock?user_id=$userId&symbol=${stock.symbol}');
+      final response = await http.delete(
+        url,
+        headers: {"Content-Type": "application/json"},
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _allSymbols.remove(stock);
+        });
+      } else {
+        print("Error deleting stock: ${response.body}");
+      }
+    } catch (e) {
+      print("Error deleting stock: $e");
+    }
+  }
+
+  Future<void> _refreshStocks() async {
+    await _fetchUserStocks();
+    await _fetchLatestPrices();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final hasStocks = _allSymbols.isNotEmpty;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -105,8 +145,11 @@ class _StocksState extends State<Stocks> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.yellow),
-            onPressed: _fetchLatestPrices, // Refresh all stock prices
+            icon: hasStocks
+                ? Icon(Icons.refresh, color: Colors.yellow)
+                : Icon(Icons.refresh, color: Colors.grey),
+            onPressed:
+                hasStocks ? _refreshStocks : null, // Disable if no stocks
           ),
         ],
         backgroundColor: Colors.black,
@@ -158,27 +201,61 @@ class _StocksState extends State<Stocks> {
                 color: Colors.yellow,
               ),
             )
+          else if (!hasStocks)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'No stocks added yet. Please add some stocks!',
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            )
           else
             Expanded(
               child: ListView.builder(
                 itemCount: _allSymbols.length,
                 itemBuilder: (context, index) {
                   final symbol = _allSymbols[index];
-                  return stockCard(
-                    symbol.companyName,
-                    symbol.latestPrice != null
-                        ? '\₹${symbol.latestPrice!.toStringAsFixed(2)}'
-                        : 'Fetching...',
-                    symbol.symbol,
-                    () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              StockInsightsPage(stockSymbol: symbol.symbol),
+                  return Dismissible(
+                    key: Key(symbol.symbol), // Unique key for each item
+                    direction:
+                        DismissDirection.endToStart, // Swipe from right to left
+                    background: Container(
+                      color: Colors.red, // Background color when swiping
+                      alignment:
+                          Alignment.centerRight, // Align icon to the right
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: const Icon(Icons.delete, color: Colors.white),
+                    ),
+                    onDismissed: (direction) async {
+                      // Delete the stock when dismissed
+                      await _deleteStock(symbol);
+
+                      // Show a SnackBar for undo action (optional)
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${symbol.companyName} deleted'),
                         ),
                       );
                     },
+                    child: stockCard(
+                      symbol.companyName,
+                      symbol.latestPrice != null
+                          ? '\₹${symbol.latestPrice!.toStringAsFixed(2)}'
+                          : 'Fetching...',
+                      symbol.symbol,
+                      () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                StockInsightsPage(stockSymbol: symbol.symbol),
+                          ),
+                        );
+                      },
+                    ),
                   );
                 },
               ),
