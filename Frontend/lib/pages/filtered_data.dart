@@ -107,7 +107,7 @@ class DisplayBalanceState extends State<DisplayBalance> {
                           ? 'Loading...'
                           : balance == 'Error'
                               ? 'Error'
-                              : '\$$balance',
+                              : '₹$balance',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 32,

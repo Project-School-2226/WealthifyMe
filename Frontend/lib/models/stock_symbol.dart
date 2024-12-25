@@ -27,7 +27,7 @@ class StockSymbol {
   static Future<void> fetchPricesForStocks(List<StockSymbol> stocks) async {
     try {
       final symbols = stocks.map((stock) => stock.symbol).toList();
-      final baseUrl  = dotenv.env['BASE_URL'];
+      final baseUrl  = dotenv.env['SERVER_URL'];
       final url = Uri.parse(
           'https://literate-magpie-separately.ngrok-free.app/stocks/getStockPrices');
       final response = await http.post(

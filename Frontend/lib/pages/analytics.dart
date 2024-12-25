@@ -123,7 +123,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard> {
   }
 
   Widget _buildSummaryCards(Map<String, dynamic> summary, Map<String, dynamic> metrics) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$');
+    final currencyFormat = NumberFormat.currency(symbol: '₹');
     
     return GridView.count(
       crossAxisCount: 2,
@@ -323,7 +323,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard> {
                   ),
                   const SizedBox(width: 5),
                   Text(
-                    '$title: \$${value.toStringAsFixed(2)}',
+                    '$title: ₹${value.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 12,
                       color: Color.fromARGB(255, 255, 246, 246),
@@ -504,7 +504,7 @@ Widget _buildMonthlyTrendChart() {
                         return SideTitleWidget(
                           axisSide: meta.axisSide,
                           child: Text(
-                            '\$${value.toInt()}',
+                            '₹${value.toInt()}',
                             style: const TextStyle(
                               color: Color(0xFF7C8DA6),
                               fontSize: 12,
@@ -624,7 +624,7 @@ Widget _buildMonthlyTrendChart() {
                   title: Text(expense['description'] ?? 'No description', style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),),
                   subtitle: Text(expense['category_name'] ?? 'Unknown Category',style: TextStyle(color: Color.fromARGB(151, 252, 248, 39)),),
                   trailing: Text(
-                    NumberFormat.currency(symbol: '\$').format(expense['amount'] ?? 0),
+                    NumberFormat.currency(symbol: '₹').format(expense['amount'] ?? 0),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,

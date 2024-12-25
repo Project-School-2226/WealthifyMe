@@ -119,7 +119,7 @@ class AuthService {
     }
 
     final url = Uri.parse(
-        'https://literate-magpie-separately.ngrok-free.app/stocks/addStocks');
+        '${dotenv.env['SERVER_URL']}/stocks/addStocks');
     final payload = {
       "user_id": user_id,
       "stocks": selectedStockSymbols,
